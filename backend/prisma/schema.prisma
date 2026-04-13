@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum SubscriptionTier {
+  FREE
+  PREMIUM
+  ENTERPRISE
+}
+
+enum MatchStatus {
+  WAITING    // waiting for second player
+  IN_PROGRESS
+  FINISHED
+  CANCELLED
+}
+
+enum ChallengeLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum MatchResult {
+  WIN
+  LOSS
+  DRAW
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id               String           @id @default(cuid())
+  githubId         String?          @unique
+  githubUsername   String?
+  passwordHash     String?
+  username         String           @unique
+  email            String?          @unique
+  avatarUrl        String?
+  bio              String?
+
+  // Subscription
+  tier             SubscriptionTier @default(FREE)
+  stripeCustomerId String?          @unique
+
+  // Onboarding
+  setupCompleted   Boolean          @default(false)
+  preferredLang    String           @default("javascript")
+  skillLevel       String           @default("intermediate")
+
+  // Stats
+  rating           Int              @default(1000)
+  wins             Int              @default(0)
+  losses           Int              @default(0)
+  draws            Int              @default(0)
+  languagesPlayed  Json             @default("{}")  // { javascript: 5, python: 3, ... }
+
+  // Streak
+  currentStreak    Int              @default(0)
+  longestStreak    Int              @default(0)
+  lastPlayedDate   DateTime?
+
+  // Settings
+  theme            String           @default("system")  // light / dark / system
+  notifMatches     Boolean          @default(true)
+  notifSummary     Boolean          @default(true)
+  notifMilestone   Boolean          @default(true)
+
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  // Relations
+  subscription     Subscription?
+  matchesAsPlayer1 Match[]          @relation("Player1")
+  matchesAsPlayer2 Match[]          @relation("Player2")
+  matchResults     MatchPlayer[]
+  privateRooms     PrivateRoom[]
+
+  @@map("users")
+}
+
+model Subscription {
+  id                   String           @id @default(cuid())
+  userId               String           @unique
+  tier                 SubscriptionTier
+  stripeSubscriptionId String?          @unique
+  stripePriceId        String?
+  status               String           // active, canceled, past_due
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  // Relations
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Challenge {
+  id          String         @id @default(cuid())
+  title       String
+  description String
+  level       ChallengeLevel
+  language    String         // "javascript", "typescript", "python", etc.
+  starterCode String         // boilerplate shown to players
+  testCases   Json           // array of { input, expectedOutput }
+  timeLimit   Int            @default(300) // seconds
+  isAiGenerated Boolean      @default(false)
+  createdAt   DateTime       @default(now())
+
+  // Relations
+  matches     Match[]
+
+  @@map("challenges")
+}
+
+model Match {
+  id          String      @id @default(cuid())
+  status      MatchStatus @default(WAITING)
+  challengeId String
+  player1Id   String
+  player2Id   String?     // null while waiting for opponent
+  winnerId    String?
+  language    String      @default("javascript")
+  difficulty  String      @default("easy")
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  challenge   Challenge   @relation(fields: [challengeId], references: [id])
+  player1     User        @relation("Player1", fields: [player1Id], references: [id])
+  player2     User?       @relation("Player2", fields: [player2Id], references: [id])
+  players     MatchPlayer[]
+
+  @@map("matches")
+}
+
+// Stores per-player data within a match (code submitted, result, score)
+model MatchPlayer {
+  id           String      @id @default(cuid())
+  matchId      String
+  userId       String
+  result       MatchResult?
+  finalCode    String?     // last submitted code
+  testsPassed  Int         @default(0)
+  testsTotal   Int         @default(0)
+  submittedAt  DateTime?
+  ratingChange Int         @default(0) // +/- applied to user rating
+
+  // Relations
+  match        Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user         User        @relation(fields: [userId], references: [id])
+
+  @@unique([matchId, userId])
+  @@map("match_players")
+}
+
+model PrivateRoom {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  status      String   @default("waiting") // waiting / active / finished
+  maxPlayers  Int      @default(2)
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@map("private_rooms")
+}
+
+model CuratedChallenge {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  difficulty  String
+  tags        String[]
+  starterCode String
+  runnerCode  String
+  solution    String
+  language    String   @default("javascript")
+  verified    Boolean  @default(false)
+  usedCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@map("curated_challenges")
+}
+
+model DailyChallenge {
+  id          String   @id @default(cuid())
+  date        String   @unique // "YYYY-MM-DD"
+  title       String
+  description String
+  difficulty  String   // easy / medium / hard
+  createdAt   DateTime @default(now())
+
+  @@map("daily_challenges")
+}

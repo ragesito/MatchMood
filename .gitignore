@@ -1,0 +1,44 @@
+# ── Dependencies ─────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ── Environment variables (NEVER commit secrets) ─────────────
+.env
+.env.*
+!.env.example
+
+# ── Build outputs ─────────────────────────────────────────────
+dist/
+build/
+out/
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDEs ──────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ── Claude Code (internal tool config) ───────────────────────
+.claude/
+
+# ── Docker local volumes ──────────────────────────────────────
+pgdata/
+docker-volumes/
+
+# ── Auto-generated docs ───────────────────────────────────────
+frontend/README.md
