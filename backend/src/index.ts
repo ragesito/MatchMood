@@ -23,14 +23,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 
-// Security middleware
-app.use(helmet());
-
-// CORS
-app.use(cors({
+// CORS must be first — before helmet and everything else
+const corsOptions = {
   origin: ['https://matchmood.dev', 'https://www.matchmood.dev', 'http://localhost:4200'],
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // handle preflight for all routes
+
+// Security middleware
+app.use(helmet());
 
 // Stripe webhook needs raw body — must be before express.json()
 app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
