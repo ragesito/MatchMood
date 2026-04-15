@@ -31,7 +31,6 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // handle preflight for all routes
 
 // Security middleware
 app.use(helmet());
