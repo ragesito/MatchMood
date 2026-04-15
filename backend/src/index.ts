@@ -23,11 +23,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 
+const ALLOWED_ORIGINS = [
+  FRONTEND_URL,
+  'https://matchmood.dev',
+  'https://www.matchmood.dev',
+  'http://localhost:4200',
+];
+
 // Security middleware
 app.use(helmet());
 
 // CORS
-app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 
 // Stripe webhook needs raw body — must be before express.json()
 app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
