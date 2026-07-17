@@ -1,10 +1,11 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import prisma from './config/prisma';
+import { Prisma } from './generated/prisma/client';
 import passport from './config/passport';
 import authRoutes from './routes/auth';
 import judgeRoutes from './routes/judge';
@@ -58,6 +59,28 @@ app.use('/rooms', roomsRoutes);
 // Health check
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Unknown routes
+app.use((_req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
+// Error handler. Must be last and must keep all four parameters — Express
+// identifies error middleware by arity, so dropping `next` silently disables it.
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  console.error(err);
+
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+    res.status(409).json({ error: 'Resource already exists' });
+    return;
+  }
+  if (err instanceof Prisma.PrismaClientValidationError) {
+    res.status(400).json({ error: 'Invalid request' });
+    return;
+  }
+
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 // Create HTTP server and attach Socket.io
