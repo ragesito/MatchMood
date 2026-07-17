@@ -186,6 +186,7 @@ model CuratedChallenge {
   starterCode String
   runnerCode  String
   solution    String
+  testCases   Json     @default("[]")
   language    String   @default("javascript")
   verified    Boolean  @default(false)
   usedCount   Int      @default(0)

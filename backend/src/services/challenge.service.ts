@@ -154,7 +154,7 @@ export async function generateChallenge(level: Level, language: string) {
           level,
           language,
           starterCode: curated.starterCode,
-          testCases: [],
+          testCases: curated.testCases ?? [],
           isAiGenerated: false,
         },
       });
@@ -177,7 +177,7 @@ export async function generateChallenge(level: Level, language: string) {
         if (fallback) {
           await prisma.curatedChallenge.update({ where: { id: fallback.id }, data: { usedCount: { increment: 1 } } });
           const challenge = await prisma.challenge.create({
-            data: { title: fallback.title, description: fallback.description, level, language: fallback.language, starterCode: fallback.starterCode, testCases: [], isAiGenerated: false },
+            data: { title: fallback.title, description: fallback.description, level, language: fallback.language, starterCode: fallback.starterCode, testCases: fallback.testCases ?? [], isAiGenerated: false },
           });
           return { ...challenge, runnerCode: fallback.runnerCode };
         }
