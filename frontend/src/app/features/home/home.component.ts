@@ -25,7 +25,7 @@ type ModalMode = 'login' | 'signup' | null;
       <nav class="nav" #nav>
         <a class="brand" (click)="scrollTop()">
           <span class="mark" [innerHTML]="markSvg"></span>
-          <span class="wordmark">match<span class="lime">mood</span><i class="cur"></i></span>
+          <span class="wordmark">match<span class="lime">mood</span></span>
         </a>
         <div class="nav-links">
           <a (click)="scrollTo('modes')">modes</a>
@@ -47,7 +47,7 @@ type ModalMode = 'login' | 'signup' | null;
       <section class="hero">
         <div class="hero-copy">
           <div class="eyebrow" #eyebrow>
-            <span class="blink">▍</span> ranked 1v1 algorithm duels · ai-generated · verified elo
+            ranked 1v1 algorithm duels · ai-generated · verified elo
           </div>
           <h1 class="title">
             <span class="ln" #t1>Code is the</span>
@@ -361,7 +361,6 @@ type ModalMode = 'login' | 'signup' | null;
     .brand{display:flex;align-items:center;gap:11px;cursor:pointer;user-select:none}
     .mark{display:flex;width:34px;height:34px} .mark.sm{width:26px;height:26px} .mark svg{width:100%;height:100%}
     .wordmark{font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:-.02em;display:flex;align-items:center}
-    .cur{width:8px;height:19px;background:var(--lime);margin-left:3px;animation:blink 1.1s steps(1) infinite}
     @keyframes blink{50%{opacity:0}}
     .nav-links{display:flex;gap:24px;margin-left:8px}
     .nav-links a{font-family:var(--mono);font-size:13px;color:var(--mut);cursor:pointer;transition:color .15s}
@@ -373,7 +372,6 @@ type ModalMode = 'login' | 'signup' | null;
     .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
       max-width:1240px;margin:0 auto;padding:80px 48px 90px}
     .eyebrow{font-family:var(--mono);font-size:13px;color:var(--mut);margin-bottom:26px;letter-spacing:.01em}
-    .eyebrow .blink{color:var(--lime);animation:blink 1.1s steps(1) infinite}
     .title{font-size:clamp(52px,7.2vw,104px);line-height:.9;letter-spacing:-.04em;font-weight:700;margin-bottom:28px}
     .title .ln{display:block;overflow:hidden}
     .lede{font-size:18px;line-height:1.6;color:var(--mut);max-width:520px;margin-bottom:34px}
