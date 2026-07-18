@@ -1,3 +1,4 @@
+import './config/env'; // validate env vars before anything else touches them
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';

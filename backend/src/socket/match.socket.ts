@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { JwtPayload } from '../middleware/auth';
 import prisma from '../config/prisma';
 import { generateChallenge } from '../services/challenge.service';
+import { env } from '../config/env';
 
 const WINS_TO_WIN = 1; // 1 round — winner takes all
 const MAX_ROUNDS  = 5; // safety cap — if nobody wins after 5 rounds, end as draw
@@ -64,7 +65,7 @@ export function registerMatchHandlers(io: Server): void {
     const token = socket.handshake.auth['token'] as string;
     if (!token) return next(new Error('Authentication required'));
     try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+      const payload = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
       socket.data['user'] = payload;
       next();
     } catch {
