@@ -1,0 +1,6 @@
+<svg width="120" height="120" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-label="MatchMood mark">
+  <!-- Versus mark: two opposing code brackets meeting at a terminal cursor -->
+  <path d="M8 9 L14 16 L8 23" fill="none" stroke="#C6FF3D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 9 L18 16 L24 23" fill="none" stroke="#FF3D77" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="15.1" y="9.5" width="1.8" height="13" rx="0.9" fill="#EDEDED"/>
+</svg>
