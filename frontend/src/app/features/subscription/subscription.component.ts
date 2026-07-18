@@ -1,9 +1,8 @@
 import { Component, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ApiService } from '../../core/services/api.service';
 import { FaqModalService } from '../../core/services/faq-modal.service';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-subscription',
@@ -272,14 +271,14 @@ export class SubscriptionComponent {
   billing     = signal<'monthly' | 'annual'>('monthly');
 
   constructor(
-    private http: HttpClient,
+    private api: ApiService,
     public authService: AuthService,
     public faqModal: FaqModalService,
   ) {}
 
   upgrade(tier: 'PREMIUM' | 'ENTERPRISE'): void {
     this.loading.set(tier);
-    this.http.post<{ url: string }>(`${environment.apiUrl}/stripe/create-checkout`, { tier, billing: this.billing() })
+    this.api.createCheckout(tier, this.billing())
       .subscribe({
         next: ({ url }) => window.location.href = url,
         error: () => this.loading.set(null),

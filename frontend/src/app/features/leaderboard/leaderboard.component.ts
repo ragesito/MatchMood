@@ -1,30 +1,9 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
-import { environment } from '../../../environments/environment';
-
-interface LeaderboardEntry {
-  rank: number;
-  username: string;
-  avatarUrl: string | null;
-  elo: number;
-  winRate: number;
-  totalMatches: number;
-  currentStreak: number;
-  tier: string;
-  id: string;
-}
-
-interface LeaderboardResponse {
-  entries: LeaderboardEntry[];
-  total: number;
-  page: number;
-  limit: number;
-  userRank?: number;
-  userEntry?: LeaderboardEntry;
-}
+import { ApiService } from '../../core/services/api.service';
+import { LeaderboardResponse } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-leaderboard',
@@ -420,7 +399,7 @@ interface LeaderboardResponse {
 })
 export class LeaderboardComponent implements OnInit {
   authService = inject(AuthService);
-  private http = inject(HttpClient);
+  private api = inject(ApiService);
 
   period   = signal<'global' | 'weekly'>('global');
   page     = signal(1);
@@ -487,10 +466,7 @@ export class LeaderboardComponent implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    const lang = this.activeLang() !== 'all' ? `&language=${this.activeLang()}` : '';
-    this.http.get<LeaderboardResponse>(
-      `${environment.apiUrl}/leaderboard?period=${this.period()}&page=${this.page()}&limit=25${lang}`
-    ).subscribe({
+    this.api.getLeaderboard(this.period(), this.page(), 25, this.activeLang()).subscribe({
       next:  d => { this.data.set(d); this.loading.set(false); },
       error: () => { this.loading.set(false); },
     });

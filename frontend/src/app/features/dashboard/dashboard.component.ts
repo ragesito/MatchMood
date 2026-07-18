@@ -1,15 +1,12 @@
 import { Component, computed, signal, OnInit, AfterViewInit, ElementRef, ViewChildren, QueryList } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
+import { ApiService } from '../../core/services/api.service';
 import { NgxSilkComponent } from '@omnedia/ngx-silk';
 import { environment } from '../../../environments/environment';
 import { getRank, getNextRank, getRankProgress } from '../../core/constants/ranks';
 import { RankModalService } from '../../core/services/rank-modal.service';
-
-interface DailyChallenge {
-  id: string; title: string; description: string; difficulty: string; date: string;
-}
+import { DailyChallenge } from '../../core/models/api.models';
 
 function countUp(el: HTMLElement, target: number, duration = 700) {
   const start = performance.now();
@@ -1033,10 +1030,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     { rank: 7, username: 'rustacean',  lang: 'Rust',       rating: 1555, wins: 40, losses: 38 },
   ];
 
-  constructor(public authService: AuthService, private http: HttpClient, public rankModal: RankModalService) {}
+  constructor(public authService: AuthService, private api: ApiService, public rankModal: RankModalService) {}
 
   ngOnInit(): void {
-    this.http.get<DailyChallenge>(`${environment.apiUrl}/challenges/daily`)
+    this.api.getDailyChallenge()
       .subscribe({ next: (d) => this.dailyChallenge.set(d), error: () => {} });
     if (this.authService.shouldShowGithubNudge()) this.showGithubNudge.set(true);
     this.checkFirstVisit();

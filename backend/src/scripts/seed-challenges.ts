@@ -1,6 +1,7 @@
 import prisma from '../config/prisma';
+import testCasesByTitle from './challenge-testcases.json';
 
-const challenges = [
+export const challenges = [
   {
     title: 'Two Sum',
     description: 'Given an array of integers `nums` and an integer `target`, return the indices of the two numbers that add up to `target`.\n\nExample: nums=[2,7,11,15], target=9 → [0,1]',
@@ -111,7 +112,7 @@ const challenges = [
     difficulty: 'medium', tags: ['strings', 'stack'], language: 'javascript',
     starterCode: 'function solve(s) {\n  // Write your solution here\n}',
     runnerCode: `const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst s = JSON.parse(lines[0]);\nconsole.log(JSON.stringify(solve(s)));`,
-    solution: 'function solve(s){const st=[],m={")":" (","]}":"[","}":" {"};for(const c of s){if("([{".includes(c))st.push(c);else if(st.pop()!==m[c])return false;}return st.length===0;}',
+    solution: 'function solve(s){const st=[],m={")":"(","]":"[","}":"{"};for(const c of s){if("([{".includes(c))st.push(c);else if(st.pop()!==m[c])return false;}return st.length===0;}',
   },
   {
     title: 'Sort Characters By Frequency',
@@ -163,19 +164,33 @@ const challenges = [
   },
 ];
 
+const TEST_CASES = testCasesByTitle as Record<string, { input: string; expectedOutput: string }[]>;
+
 async function main() {
   console.log('Seeding curated challenges...');
   let created = 0;
+  let updated = 0;
   for (const ch of challenges) {
-    const exists = await prisma.curatedChallenge.findFirst({ where: { title: ch.title } });
-    if (!exists) {
-      await prisma.curatedChallenge.create({ data: { ...ch, verified: true } });
+    const testCases = TEST_CASES[ch.title] ?? [];
+    if (testCases.length === 0) {
+      throw new Error(`No test cases for "${ch.title}" — run gen-testcases.ts first`);
+    }
+    const data = { ...ch, testCases, verified: true };
+    const existing = await prisma.curatedChallenge.findFirst({ where: { title: ch.title } });
+    if (existing) {
+      // Backfill testCases and pick up solution fixes on existing rows.
+      await prisma.curatedChallenge.update({ where: { id: existing.id }, data });
+      updated++;
+    } else {
+      await prisma.curatedChallenge.create({ data });
       created++;
     }
   }
-  console.log(`Done. Created ${created} new challenges (${challenges.length - created} already existed).`);
+  console.log(`Done. Created ${created}, updated ${updated}.`);
 }
 
-main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect());
+if (require.main === module) {
+  main()
+    .catch(console.error)
+    .finally(() => prisma.$disconnect());
+}

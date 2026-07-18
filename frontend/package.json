@@ -22,6 +22,7 @@
     "@omnedia/ngx-aurora": "^4.0.1",
     "@omnedia/ngx-silk": "^4.0.1",
     "@omnedia/ngx-steel-beams": "^4.0.1",
+    "gsap": "^3.15.0",
     "monaco-editor": "^0.55.1",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.3",

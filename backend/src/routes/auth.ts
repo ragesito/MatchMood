@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { requireAuth, JwtPayload } from '../middleware/auth';
 import prisma from '../config/prisma';
+import { env } from '../config/env';
 
 const router = Router();
 
@@ -12,7 +13,7 @@ const router = Router();
 function signToken(userId: string, username: string): string {
   return jwt.sign(
     { userId, username },
-    process.env.JWT_SECRET!,
+    env.JWT_SECRET,
     { expiresIn: '7d' }
   );
 }

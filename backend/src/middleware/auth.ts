@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 
 export interface JwtPayload {
   userId: string;
@@ -19,7 +20,7 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction): 
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      req.user = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+      req.user = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
     } catch { /* no-op */ }
   }
   next();
@@ -36,7 +37,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   const token = authHeader.split(' ')[1];
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    const payload = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
     req.user = payload;
     next();
   } catch {

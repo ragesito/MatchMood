@@ -1,8 +1,10 @@
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import { randomUUID } from 'crypto';
 import { JwtPayload } from '../middleware/auth';
 import prisma from '../config/prisma';
 import { generateChallenge } from '../services/challenge.service';
+import { env } from '../config/env';
 
 const WINS_TO_WIN = 1; // 1 round — winner takes all
 const MAX_ROUNDS  = 5; // safety cap — if nobody wins after 5 rounds, end as draw
@@ -33,10 +35,21 @@ interface ActiveMatch {
   difficulty:       string;
   roundWins:        Map<string, number>;
   submissions:      Map<string, { passed: number; total: number }>;
+  submitting:       Set<string>;  // userIds with a submit in flight (pre-await guard)
   runnerCode:       string;
   currentChallenge: { title: string; description: string; level: string };
   roundHistory:     RoundRecord[];
   roundStartedAt:   number;
+  finishing:        boolean;       // set once, synchronously, so finishMatch runs at most once
+  privateCode?:     string;        // set for private-room matches, so the room can be cleaned up
+}
+
+// Returns the match at roomId only if userId is one of its two players.
+function getMatchForPlayer(roomId: string, userId: string): ActiveMatch | null {
+  const match = activeMatches.get(roomId);
+  if (!match) return null;
+  if (match.player1Id !== userId && match.player2Id !== userId) return null;
+  return match;
 }
 
 const activeMatches: Map<string, ActiveMatch> = new Map();
@@ -64,7 +77,7 @@ export function registerMatchHandlers(io: Server): void {
     const token = socket.handshake.auth['token'] as string;
     if (!token) return next(new Error('Authentication required'));
     try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+      const payload = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
       socket.data['user'] = payload;
       next();
     } catch {
@@ -78,6 +91,13 @@ export function registerMatchHandlers(io: Server): void {
 
     // ── Reconnect: clear forfeit timer ────────────────────────────────────
     socket.on('match:reconnect', ({ roomId }: { roomId: string }) => {
+      // Only a real player of a live match may reconnect to it.
+      if (!getMatchForPlayer(roomId, user.userId)) return;
+
+      // The new socket has a fresh id, so it must re-join the room to keep
+      // receiving round/finish events.
+      socket.join(roomId);
+
       const timers = disconnectTimers.get(roomId);
       if (timers?.has(user.userId)) {
         clearTimeout(timers.get(user.userId)!);
@@ -92,6 +112,18 @@ export function registerMatchHandlers(io: Server): void {
       const difficulty = (data?.difficulty ?? 'easy').toLowerCase();
       const level      = difficulty.toUpperCase() as 'EASY' | 'MEDIUM' | 'HARD';
 
+      // Drop any stale queue entry for this user (double-click, refresh) so they
+      // can never be matched twice.
+      queue.delete(user.userId);
+
+      // Refuse to queue while already in a live match.
+      for (const m of activeMatches.values()) {
+        if (m.player1Id === user.userId || m.player2Id === user.userId) {
+          socket.emit('match:error', { message: 'Already in a match' });
+          return;
+        }
+      }
+
       // Find opponent waiting with the same language AND difficulty
       const waitingEntry = [...queue.entries()].find(
         ([uid, entry]) =>
@@ -104,7 +136,7 @@ export function registerMatchHandlers(io: Server): void {
         const [opponentId, opponentQueueEntry] = waitingEntry;
         queue.delete(opponentId);
 
-        const roomId = `match_${Date.now()}`;
+        const roomId = `match_${randomUUID()}`;
         socket.join(roomId);
         io.sockets.sockets.get(opponentQueueEntry.socketId)?.join(roomId);
 
@@ -157,10 +189,12 @@ export function registerMatchHandlers(io: Server): void {
           difficulty,
           roundWins:        new Map([[opponentId, 0], [user.userId, 0]]),
           submissions:      new Map(),
+          submitting:       new Set(),
           runnerCode:       challenge.runnerCode,
           currentChallenge: { title: challenge.title, description: challenge.description, level: challenge.level },
           roundHistory:     [],
           roundStartedAt:   Date.now(),
+          finishing:        false,
         });
 
         io.to(roomId).emit('match:started', {
@@ -186,20 +220,25 @@ export function registerMatchHandlers(io: Server): void {
 
     // ── Real-time code sharing ─────────────────────────────────────────────
     socket.on('match:code_update', ({ roomId, code }: { roomId: string; code: string }) => {
+      // Only an actual player of this match may stream code into its room.
+      if (!getMatchForPlayer(roomId, user.userId)) return;
       socket.to(roomId).emit('match:opponent_code', { code });
     });
 
     // ── Submit solution ────────────────────────────────────────────────────
-    socket.on('match:submit', async ({ roomId, code, language }: {
-      roomId: string; code: string; language: string;
+    socket.on('match:submit', async ({ roomId, code }: {
+      roomId: string; code: string;
     }) => {
-      const match = activeMatches.get(roomId);
+      const match = getMatchForPlayer(roomId, user.userId);
       if (!match) {
         socket.emit('match:error', { message: 'Match not found' });
         return;
       }
 
-      if (match.submissions.has(user.userId)) return;
+      // Reserve synchronously, before any await, so a double submit from the
+      // same player can't run judging (and resolveRound) twice.
+      if (match.submissions.has(user.userId) || match.submitting.has(user.userId)) return;
+      match.submitting.add(user.userId);
 
       console.log(`Submit from ${user.username} in room ${roomId} (round ${match.round})`);
       socket.emit('match:judging');
@@ -210,7 +249,8 @@ export function registerMatchHandlers(io: Server): void {
           include: { challenge: true },
         });
         const testCases = (dbMatch?.challenge.testCases as Array<{ input: string; expectedOutput: string }>) ?? [];
-        const languageId = LANGUAGE_IDS[language] ?? LANGUAGE_IDS[match.language] ?? 63;
+        // Trust the match's language, not the client-supplied one.
+        const languageId = LANGUAGE_IDS[match.language] ?? 63;
 
         const results = await Promise.all(
           testCases.map((tc) => runTestCase(code, languageId, tc.input, tc.expectedOutput, match.runnerCode))
@@ -220,6 +260,7 @@ export function registerMatchHandlers(io: Server): void {
         const total  = testCases.length;
 
         match.submissions.set(user.userId, { passed, total });
+        match.submitting.delete(user.userId);
 
         let currentRecord = match.roundHistory.find(r => r.roundNumber === match.round);
         if (!currentRecord) {
@@ -249,6 +290,7 @@ export function registerMatchHandlers(io: Server): void {
           socket.to(roomId).emit('match:opponent_submitted', { passed, total });
         }
       } catch (err) {
+        match.submitting.delete(user.userId); // allow a retry after a failed run
         console.error('Submission error:', err);
         socket.emit('match:error', { message: 'Execution failed' });
       }
@@ -256,6 +298,16 @@ export function registerMatchHandlers(io: Server): void {
 
     // ── Private room: create ───────────────────────────────────────────────
     socket.on('room:create', async ({ code }: { code: string }) => {
+      if (typeof code !== 'string' || !/^[A-Z0-9]{4,8}$/.test(code)) {
+        socket.emit('room:error', { message: 'Invalid room code' });
+        return;
+      }
+      // Never overwrite a room owned by someone else (code-squatting/hijack).
+      const existing = privateRooms.get(code);
+      if (existing && existing.creatorId !== user.userId) {
+        socket.emit('room:error', { message: 'Room code already in use' });
+        return;
+      }
       privateRooms.set(code, { creatorId: user.userId, creatorSocketId: socket.id });
       socket.join(`private_${code}`);
       socket.emit('room:created', { code });
@@ -298,9 +350,10 @@ export function registerMatchHandlers(io: Server): void {
           player1Id: room.creatorId, player2Id: user.userId, dbMatchId: dbMatch.id,
           round: 1, language: 'javascript', difficulty: 'easy',
           roundWins: new Map([[room.creatorId, 0], [user.userId, 0]]),
-          submissions: new Map(), runnerCode: challenge.runnerCode,
+          submissions: new Map(), submitting: new Set(), runnerCode: challenge.runnerCode,
           currentChallenge: { title: challenge.title, description: challenge.description, level: challenge.level },
           roundHistory: [], roundStartedAt: Date.now(),
+          finishing: false, privateCode: code,
         });
 
         io.to(roomId).emit('match:started', {
@@ -335,6 +388,14 @@ export function registerMatchHandlers(io: Server): void {
     socket.on('disconnect', () => {
       queue.delete(user.userId);
       console.log(`Socket disconnected: ${user.username}`);
+
+      // Drop private rooms this socket created that never started a match.
+      for (const [code, room] of privateRooms.entries()) {
+        if (room.creatorSocketId === socket.id && !room.roomId) privateRooms.delete(code);
+      }
+
+      // Drop this socket from any spectator sets.
+      for (const set of spectators.values()) set.delete(socket.id);
 
       for (const [roomId, match] of activeMatches.entries()) {
         const isPlayer = match.player1Id === user.userId || match.player2Id === user.userId;
@@ -394,25 +455,36 @@ async function resolveRound(io: Server, roomId: string, match: ActiveMatch): Pro
   } else {
     match.round     += 1;
     match.submissions = new Map();
+    match.submitting  = new Set();
 
     const level = match.difficulty.toUpperCase() as 'EASY' | 'MEDIUM' | 'HARD';
     setTimeout(async () => {
-      io.to(roomId).emit('match:generating');
-      const challenge = await generateChallenge(level, match.language);
-      match.runnerCode = challenge.runnerCode;
-      match.currentChallenge = { title: challenge.title, description: challenge.description, level: challenge.level };
+      // The match may have ended (forfeit/disconnect) during this delay.
+      if (activeMatches.get(roomId) !== match || match.finishing) return;
+      try {
+        io.to(roomId).emit('match:generating');
+        const challenge = await generateChallenge(level, match.language);
+        if (activeMatches.get(roomId) !== match || match.finishing) return;
+        match.runnerCode = challenge.runnerCode;
+        match.currentChallenge = { title: challenge.title, description: challenge.description, level: challenge.level };
+        match.roundStartedAt = Date.now();
 
-      io.to(roomId).emit('match:next_round', {
-        round:     match.round,
-        winsToWin: WINS_TO_WIN,
-        starterCode: challenge.starterCode,
-        language:    challenge.language,
-        challenge: {
-          title:       challenge.title,
-          description: challenge.description,
-          level:       challenge.level,
-        },
-      });
+        io.to(roomId).emit('match:next_round', {
+          round:     match.round,
+          winsToWin: WINS_TO_WIN,
+          starterCode: challenge.starterCode,
+          language:    challenge.language,
+          challenge: {
+            title:       challenge.title,
+            description: challenge.description,
+            level:       challenge.level,
+          },
+        });
+      } catch (err) {
+        // Never let a rejected async timer crash the process.
+        console.error('Next-round generation failed:', err);
+        io.to(roomId).emit('match:error', { message: 'Failed to start next round' });
+      }
     }, 4000);
   }
 }
@@ -425,16 +497,18 @@ async function finishMatch(
   p1Wins: number,
   p2Wins: number
 ): Promise<void> {
+  // Idempotency guard: several paths (both players submitting, double
+  // disconnect, submit racing the forfeit timer) can call this for the same
+  // match. The flag is set synchronously, before any await, so only the first
+  // caller proceeds and ratings are applied exactly once.
+  if (match.finishing) return;
+  match.finishing = true;
+
   let winnerId: string | null = null;
   if (p1Wins > p2Wins) winnerId = match.player1Id;
   else if (p2Wins > p1Wins) winnerId = match.player2Id;
 
   const ratingChange = 25;
-
-  await prisma.match.update({
-    where: { id: match.dbMatchId },
-    data:  { status: 'FINISHED', winnerId, finishedAt: new Date() },
-  });
 
   const today = new Date().toDateString();
   const calcStreak = (u: { lastPlayedDate: Date | null; currentStreak: number; longestStreak: number }) => {
@@ -447,10 +521,11 @@ async function finishMatch(
     return { currentStreak: streak, longestStreak: Math.max(streak, u.longestStreak), lastPlayedDate: new Date() };
   };
 
-  // Increment languagesPlayed[language] for both players
+  // Increment languagesPlayed[language] for both players. Returns the Prisma
+  // promise (no await) so it can be composed into the $transaction below.
   const lang = match.language;
-  const incrementLangPlayed = async (userId: string) => {
-    await prisma.$executeRaw`
+  const incrementLangPlayed = (userId: string) =>
+    prisma.$executeRaw`
       UPDATE users
       SET "languagesPlayed" = "languagesPlayed" ||
         jsonb_build_object(
@@ -459,7 +534,6 @@ async function finishMatch(
         )
       WHERE id = ${userId}
     `;
-  };
 
   if (winnerId) {
     const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
@@ -469,7 +543,8 @@ async function finishMatch(
       prisma.user.findUnique({ where: { id: loserId  }, select: { lastPlayedDate: true, currentStreak: true, longestStreak: true } }),
     ]);
 
-    await Promise.all([
+    await prisma.$transaction([
+      prisma.match.update({ where: { id: match.dbMatchId }, data: { status: 'FINISHED', winnerId, finishedAt: new Date() } }),
       prisma.user.update({ where: { id: winnerId }, data: { wins:   { increment: 1 }, rating: { increment: ratingChange }, ...calcStreak(winner!) } }),
       prisma.user.update({ where: { id: loserId  }, data: { losses: { increment: 1 }, rating: { decrement: ratingChange }, ...calcStreak(loser!)  } }),
       prisma.matchPlayer.update({ where: { matchId_userId: { matchId: match.dbMatchId, userId: winnerId } }, data: { result: 'WIN',  ratingChange } }),
@@ -483,7 +558,8 @@ async function finishMatch(
       prisma.user.findUnique({ where: { id: match.player2Id }, select: { lastPlayedDate: true, currentStreak: true, longestStreak: true } }),
     ]);
 
-    await Promise.all([
+    await prisma.$transaction([
+      prisma.match.update({ where: { id: match.dbMatchId }, data: { status: 'FINISHED', winnerId, finishedAt: new Date() } }),
       prisma.user.update({ where: { id: match.player1Id }, data: { draws: { increment: 1 }, ...calcStreak(p1!) } }),
       prisma.user.update({ where: { id: match.player2Id }, data: { draws: { increment: 1 }, ...calcStreak(p2!) } }),
       prisma.matchPlayer.update({ where: { matchId_userId: { matchId: match.dbMatchId, userId: match.player1Id } }, data: { result: 'DRAW', ratingChange: 0 } }),
@@ -517,6 +593,8 @@ async function finishMatch(
   const timers = disconnectTimers.get(roomId);
   if (timers) { timers.forEach(t => clearTimeout(t)); disconnectTimers.delete(roomId); }
   spectators.delete(roomId);
+  // Private rooms were never cleaned up -> unbounded growth. Drop this one.
+  if (match.privateCode) privateRooms.delete(match.privateCode);
 }
 
 // ── Execute a single test case via Judge0 ─────────────────────────────────
