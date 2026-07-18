@@ -2,7 +2,6 @@ import { Component, signal, HostListener } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { NgxSteelBeamsComponent } from '@omnedia/ngx-steel-beams';
 import { RankModalComponent } from './rank-modal.component';
 import { FaqModalComponent }      from './faq-modal.component';
 import { GameSetupModalComponent } from './game-setup-modal.component';
@@ -10,39 +9,32 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, NgxSteelBeamsComponent, RankModalComponent, FaqModalComponent, GameSetupModalComponent],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, RankModalComponent, FaqModalComponent, GameSetupModalComponent],
   template: `
     @if (authService.user(); as user) {
     <div class="shell">
 
-      <!-- ─── Background ─────────────────────────────────────────────── -->
-      <om-steel-beams
-        class="shell-bg"
-        [beamWidth]="10"
-        [beamHeight]="20"
-        [beamNumber]="10"
-        [lightColor]="'#ffffff'"
-        [speed]="0.008"
-        [noiseIntensity]="3.5"
-        [scale]="0.2"
-        [rotation]="30"
-      ></om-steel-beams>
-      <div class="shell-blur"></div>
+      <!-- ─── Ambient background: terminal grid + lime glow ─────────── -->
+      <div class="shell-grid"></div>
+      <div class="shell-glow"></div>
 
       <!-- ─── Sidebar ──────────────────────────────────────────────── -->
       <aside class="sidebar" [class.collapsed]="collapsed()">
 
         <!-- Logo -->
         <div class="sidebar-top">
-          @if (!collapsed()) {
-            <a routerLink="/dashboard" class="sidebar-logo">
-              <span class="logo-text"><span class="logo-match">Match</span><span class="logo-mood">Mood</span></span>
-            </a>
-          } @else {
-            <a routerLink="/dashboard" class="sidebar-logo-mini">
-              <span class="logo-mark"></span>
-            </a>
-          }
+          <a routerLink="/dashboard" class="sidebar-logo">
+            <span class="logo-mark">
+              <svg viewBox="0 0 32 32" width="26" height="26" aria-label="MatchMood">
+                <path d="M8 9 L14 16 L8 23" fill="none" stroke="var(--lime)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M24 9 L18 16 L24 23" fill="none" stroke="var(--magenta)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="15.1" y="9.5" width="1.8" height="13" rx="0.9" fill="var(--text-primary)"/>
+              </svg>
+            </span>
+            @if (!collapsed()) {
+              <span class="logo-text">match<span class="logo-mood">mood</span></span>
+            }
+          </a>
           <button class="toggle-btn" (click)="toggle()" [title]="collapsed() ? 'Expand' : 'Collapse'">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" width="12" height="12">
               @if (collapsed()) {
@@ -67,7 +59,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
               <rect x="2" y="11" width="7" height="7" rx="1.5"/>
               <rect x="11" y="11" width="7" height="7" rx="1.5"/>
             </svg>
-            @if (!collapsed()) { <span class="nav-label">Dashboard</span> }
+            @if (!collapsed()) { <span class="nav-label">dashboard</span> }
           </a>
 
           <a routerLink="/arena" routerLinkActive="active"
@@ -78,7 +70,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
               <path d="M4 4l3 3M16 16l-3-3"/>
               <circle cx="10" cy="10" r="1.2" fill="currentColor" stroke="none"/>
             </svg>
-            @if (!collapsed()) { <span class="nav-label">Arena</span> }
+            @if (!collapsed()) { <span class="nav-label">arena</span> }
           </a>
 
           <a routerLink="/profile" routerLinkActive="active"
@@ -88,7 +80,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
               <circle cx="10" cy="7" r="3.5"/>
               <path d="M2.5 17c0-3.5 3.4-6 7.5-6s7.5 2.5 7.5 6"/>
             </svg>
-            @if (!collapsed()) { <span class="nav-label">My Profile</span> }
+            @if (!collapsed()) { <span class="nav-label">profile</span> }
           </a>
 
           <a routerLink="/leaderboard" routerLinkActive="active"
@@ -99,7 +91,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
               <rect x="8" y="5"  width="4" height="12" rx="1"/>
               <rect x="15" y="8" width="4" height="9"  rx="1"/>
             </svg>
-            @if (!collapsed()) { <span class="nav-label">Leaderboard</span> }
+            @if (!collapsed()) { <span class="nav-label">leaderboard</span> }
           </a>
 
           @if (user.tier === 'FREE') {
@@ -109,7 +101,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
               <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
                 <path d="M10 2l2.4 4.9 5.4.8-3.9 3.8.9 5.3L10 14.2l-4.8 2.5.9-5.3L2.2 7.7l5.4-.8L10 2z"/>
               </svg>
-              @if (!collapsed()) { <span class="nav-label">Upgrade</span> }
+              @if (!collapsed()) { <span class="nav-label">upgrade</span> }
             </a>
           }
           @if (user.tier === 'PREMIUM') {
@@ -119,7 +111,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
               <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
                 <path d="M10 2l2.4 4.9 5.4.8-3.9 3.8.9 5.3L10 14.2l-4.8 2.5.9-5.3L2.2 7.7l5.4-.8L10 2z"/>
               </svg>
-              @if (!collapsed()) { <span class="nav-label">Enterprise</span> }
+              @if (!collapsed()) { <span class="nav-label">enterprise</span> }
             </a>
           }
           @if (user.tier === 'ENTERPRISE') {
@@ -129,7 +121,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
               <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
                 <path d="M4 17V8l6-5 6 5v9"/><path d="M8 17v-5h4v5"/>
               </svg>
-              @if (!collapsed()) { <span class="nav-label">Enterprise</span> }
+              @if (!collapsed()) { <span class="nav-label">enterprise</span> }
             </a>
           }
 
@@ -159,10 +151,10 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
                 </svg>
                 @if (langOpen()) {
                   <div class="lang-submenu" (click)="$event.stopPropagation()">
-                    <div class="lang-item"><span class="lang-flag">🇪🇸</span><span>Español</span></div>
-                    <div class="lang-item"><span class="lang-flag">🇺🇸</span><span>English</span></div>
-                    <div class="lang-item"><span class="lang-flag">🇩🇪</span><span>Deutsch</span></div>
-                    <div class="lang-item"><span class="lang-flag">🇨🇳</span><span>中文</span></div>
+                    <div class="lang-item"><span class="lang-code">es</span><span>Español</span></div>
+                    <div class="lang-item"><span class="lang-code">en</span><span>English</span></div>
+                    <div class="lang-item"><span class="lang-code">de</span><span>Deutsch</span></div>
+                    <div class="lang-item"><span class="lang-code">zh</span><span>中文</span></div>
                   </div>
                 }
               </div>
@@ -217,26 +209,24 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
       display: flex;
       height: 100vh;
       overflow: hidden;
-      background: var(--bg-base, #000);
-      color: var(--text-primary, #f0f0f0);
-      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-display);
       position: relative;
     }
-    .shell-bg {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
+    .shell-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .6;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(ellipse 90% 70% at 18% 0%, #000 0%, transparent 68%);
+      mask-image: radial-gradient(ellipse 90% 70% at 18% 0%, #000 0%, transparent 68%);
     }
-    .shell-blur {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      backdrop-filter: blur(8px);
-      background: rgba(0, 0, 0, 0.45);
+    .shell-glow {
+      position: fixed; top: -12%; left: 6%; width: 620px; height: 620px; z-index: 0;
+      pointer-events: none; border-radius: 50%;
+      background: radial-gradient(circle, var(--lime-glow), transparent 62%);
     }
     .sidebar {
       position: relative;
@@ -286,27 +276,19 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
       text-decoration: none;
     }
     .logo-mark {
-      color: var(--green, #22c55e);
-      font-size: 18px;
+      display: flex;
+      align-items: center;
       flex-shrink: 0;
-      line-height: 1;
     }
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap');
-
     .logo-text {
-      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-family: var(--font-mono);
       font-size: 16px;
       font-weight: 700;
-      letter-spacing: -0.8px;
+      letter-spacing: -0.02em;
       white-space: nowrap;
-      color: #fff;
+      color: var(--text-primary);
     }
-    .logo-text .logo-match {
-      color: #fff;
-    }
-    .logo-text .logo-mood {
-      color: var(--green, #22c55e);
-    }
+    .logo-text .logo-mood { color: var(--lime); }
 
     .toggle-btn {
       background: none;
@@ -364,7 +346,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
       transform: translateY(-50%) scaleY(0);
       width: 2.5px;
       height: 18px;
-      background: var(--green, #22c55e);
+      background: var(--lime);
       border-radius: 0 2px 2px 0;
       transition: transform 150ms ease, opacity 150ms ease;
       opacity: 0;
@@ -390,6 +372,8 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
 
     /* Label text — subtle slide on hover */
     .nav-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
       transition: transform 150ms ease;
     }
     .nav-item:hover .nav-label {
@@ -404,10 +388,10 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
     }
 
     /* Upgrade items */
-    .nav-upgrade-premium       { color: var(--green, #22c55e) !important; }
-    .nav-upgrade-premium:hover { background: rgba(34,197,94,0.07) !important; }
-    .nav-upgrade-enterprise       { color: #a78bfa !important; }
-    .nav-upgrade-enterprise:hover { background: rgba(139,92,246,0.07) !important; }
+    .nav-upgrade-premium       { color: var(--lime) !important; }
+    .nav-upgrade-premium:hover { background: var(--lime-glow) !important; }
+    .nav-upgrade-enterprise       { color: #7dd3fc !important; }
+    .nav-upgrade-enterprise:hover { background: rgba(125,211,252,0.08) !important; }
 
     /* ── User area ────────────────────────────────────────────────── */
     .user-area {
@@ -436,8 +420,8 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
       background: #1a1a1a;
     }
     .user-card.menu-open {
-      border-color: rgba(34,197,94,0.35);
-      box-shadow: 0 0 0 1px rgba(34,197,94,0.12);
+      border-color: rgba(198,255,61,0.35);
+      box-shadow: 0 0 0 1px var(--lime-glow);
     }
     .user-card-inner {
       display: flex;
@@ -460,7 +444,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
     }
     .user-card:hover .user-avatar,
     .user-card.menu-open .user-avatar {
-      border-color: rgba(34,197,94,0.4);
+      border-color: rgba(198,255,61,0.45);
     }
     .user-info {
       display: flex;
@@ -470,23 +454,26 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
       text-align: left;
     }
     .user-name {
-      font-size: 12px;
+      font-family: var(--font-display);
+      font-size: 13px;
       font-weight: 600;
-      color: var(--text-secondary, #a1a1aa);
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .user-tier {
+      font-family: var(--font-mono);
       font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-top: 1px;
+      font-weight: 600;
+      text-transform: lowercase;
+      letter-spacing: 0.04em;
+      margin-top: 2px;
     }
-    .tier-free       { color: var(--text-muted, #52525b); }
-    .tier-premium    { color: var(--green, #22c55e); }
-    .tier-enterprise { color: #a78bfa; }
+    .tier-free       { color: var(--text-muted); }
+    .tier-premium    { color: var(--lime); }
+    .tier-enterprise { color: #7dd3fc; }
 
     .user-chevron {
       flex-shrink: 0;
@@ -495,7 +482,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
     }
     .user-chevron.open {
       transform: rotate(180deg);
-      color: var(--green, #22c55e);
+      color: var(--lime);
     }
 
     /* ── Popup menu ───────────────────────────────────────────────── */
@@ -574,7 +561,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
     .lang-chevron.open {
       opacity: 1;
       transform: rotate(90deg);
-      color: var(--green, #22c55e);
+      color: var(--lime);
     }
     .lang-submenu {
       position: absolute;
@@ -606,14 +593,22 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
       background: rgba(255,255,255,0.05);
       color: var(--text-primary, #fafafa);
     }
-    .lang-flag { font-size: 14px; line-height: 1; }
-
-    .menu-item-danger { color: var(--text-muted, #52525b); }
-    .menu-item-danger:hover {
-      background: rgba(239,68,68,0.08);
-      color: var(--red, #ef4444);
+    .lang-code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--lime);
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
     }
-    .menu-item-danger:hover svg { stroke: var(--red, #ef4444); }
+
+    .menu-item-danger { color: var(--text-muted); }
+    .menu-item-danger:hover {
+      background: var(--magenta-glow);
+      color: var(--magenta);
+    }
+    .menu-item-danger:hover svg { stroke: var(--magenta); }
 
     .menu-divider {
       height: 1px;
