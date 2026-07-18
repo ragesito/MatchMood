@@ -1,16 +1,15 @@
 import { Component, OnInit, OnDestroy, signal, ViewChild, ElementRef, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { SocketService } from '../../core/services/socket.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ApiService } from '../../core/services/api.service';
 import { MonacoEditorComponent } from '../../shared/components/monaco-editor.component';
 import { NgxAuroraComponent } from '@omnedia/ngx-aurora';
 import { NgxSilkComponent }  from '@omnedia/ngx-silk';
 import { getRank } from '../../core/constants/ranks';
 import { RankModalService } from '../../core/services/rank-modal.service';
 import { GameSetupModalService } from '../../core/services/game-setup-modal.service';
-import { environment } from '../../../environments/environment';
 
 type MatchState = 'idle' | 'waiting' | 'match_found' | 'generating' | 'playing' | 'judging' | 'round_result' | 'finished';
 type GameMode = '1v1' | '2v2' | 'ffa' | 'private';
@@ -1284,7 +1283,7 @@ export class ArenaComponent implements OnInit, OnDestroy {
   language = signal('javascript');
   private myCurrentCode = '';
 
-  private http = inject(HttpClient);
+  private api = inject(ApiService);
 
   constructor(
     public authService: AuthService,
@@ -1516,7 +1515,7 @@ export class ArenaComponent implements OnInit, OnDestroy {
   createRoom(): void {
     this.creatingRoom.set(true);
     this.roomError.set('');
-    this.http.post<{ code: string; expiresAt: string }>(`${environment.apiUrl}/rooms`, {}).subscribe({
+    this.api.createRoom().subscribe({
       next: (data) => {
         this.roomCode.set(data.code);
         this.creatingRoom.set(false);
@@ -1543,7 +1542,7 @@ export class ArenaComponent implements OnInit, OnDestroy {
   exportReport(): void {
     const code = this.roomCode();
     if (!code) return;
-    this.http.get(`${environment.apiUrl}/rooms/${code}/report`).subscribe({
+    this.api.getRoomReport(code).subscribe({
       next: (report) => {
         const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);

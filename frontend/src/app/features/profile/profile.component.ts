@@ -1,40 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
-import { environment } from '../../../environments/environment';
-
-interface MatchHistory {
-  matchId: string;
-  result: 'WIN' | 'LOSS' | 'DRAW' | null;
-  ratingChange: number;
-  testsPassed: number;
-  testsTotal: number;
-  finishedAt: string | null;
-  challenge: { title: string; level: string; language: string };
-  opponent: { username: string; avatarUrl: string | null } | null;
-}
-
-interface DetailedStats {
-  winRate: number;
-  avgTimeSeconds: number | null;
-  totalMatches: number;
-  winRateByLanguage: { language: string; winRate: number; played: number }[];
-}
-
-interface ProfileData {
-  username: string;
-  avatarUrl: string | null;
-  tier: 'FREE' | 'PREMIUM' | 'ENTERPRISE';
-  rating: number;
-  wins: number;
-  losses: number;
-  draws: number;
-  createdAt: string;
-  history: MatchHistory[];
-  detailedStats: DetailedStats | null;
-}
+import { ApiService } from '../../core/services/api.service';
+import { ProfileData } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-profile',
@@ -398,10 +367,10 @@ export class ProfileComponent implements OnInit {
   profile = signal<ProfileData | null>(null);
   loading = signal(true);
 
-  constructor(private http: HttpClient, public authService: AuthService) {}
+  constructor(private api: ApiService, public authService: AuthService) {}
 
   ngOnInit(): void {
-    this.http.get<ProfileData>(`${environment.apiUrl}/profile/me`).subscribe({
+    this.api.getMyProfile().subscribe({
       next: (data) => { this.profile.set(data); this.loading.set(false); },
       error: () => this.loading.set(false),
     });

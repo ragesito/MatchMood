@@ -2,11 +2,10 @@ import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { Subject } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
-import { environment } from '../../../environments/environment';
+import { ApiService } from '../../core/services/api.service';
 import { NgxSteelBeamsComponent } from '@omnedia/ngx-steel-beams';
 
 const LANGUAGES = [
@@ -409,7 +408,7 @@ const SKILL_LEVELS = [
   `],
 })
 export class SetupComponent {
-  private http = inject(HttpClient);
+  private api = inject(ApiService);
   private router = inject(Router);
   private authService = inject(AuthService);
 
@@ -443,9 +442,7 @@ export class SetupComponent {
           return of(null);
         }
         this.checkingUsername.set(true);
-        return this.http.get<{ available: boolean }>(
-          `${environment.apiUrl}/auth/check-username?username=${encodeURIComponent(val)}`
-        );
+        return this.api.checkUsername(val);
       })
     ).subscribe({
       next: (result) => {
@@ -478,7 +475,7 @@ export class SetupComponent {
   submit() {
     if (!this.canSubmit()) return;
     this.submitting.set(true);
-    this.http.patch(`${environment.apiUrl}/auth/setup`, {
+    this.api.completeSetup({
       preferredLang: this.selectedLang(),
       skillLevel: this.selectedSkill(),
       username: this.usernameInput,

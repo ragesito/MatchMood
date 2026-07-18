@@ -1,32 +1,11 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
+import { ApiService } from '../../core/services/api.service';
+import { PublicProfile } from '../../core/models/api.models';
 import { environment } from '../../../environments/environment';
 import { Title, Meta } from '@angular/platform-browser';
-
-interface PublicProfile {
-  username: string;
-  avatarUrl: string | null;
-  joinedAt: string;
-  tier: 'FREE' | 'PREMIUM' | 'ENTERPRISE';
-  elo: number;
-  rank: string;
-  totalMatches: number;
-  winRate: number;
-  currentStreak: number;
-  longestStreak: number;
-  verified: boolean;
-  historyLimited: boolean;
-  recentMatches: {
-    result: string;
-    eloChange: number;
-    language: string;
-    duration: number;
-    playedAt: string;
-  }[];
-}
 
 @Component({
   selector: 'app-public-profile',
@@ -300,7 +279,7 @@ interface PublicProfile {
 })
 export class PublicProfileComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private http = inject(HttpClient);
+  private api = inject(ApiService);
   private titleService = inject(Title);
   private metaService = inject(Meta);
   authService = inject(AuthService);
@@ -314,7 +293,7 @@ export class PublicProfileComponent implements OnInit {
 
   ngOnInit(): void {
     const username = this.route.snapshot.paramMap.get('username') ?? '';
-    this.http.get<PublicProfile>(`${environment.apiUrl}/users/${username}/public`).subscribe({
+    this.api.getPublicProfile(username).subscribe({
       next: (p) => {
         this.profile.set(p);
         this.loading.set(false);

@@ -1,9 +1,9 @@
 import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, switchMap, of, Subject } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { ApiService } from '../../core/services/api.service';
 import { environment } from '../../../environments/environment';
 
 type Tab = 'profile' | 'appearance' | 'notifications' | 'privacy' | 'gameplay' | 'danger';
@@ -720,7 +720,7 @@ type Tab = 'profile' | 'appearance' | 'notifications' | 'privacy' | 'gameplay' |
 })
 export class SettingsComponent implements OnInit {
   authService = inject(AuthService);
-  private http = inject(HttpClient);
+  private api = inject(ApiService);
   private router = inject(Router);
 
   activeTab = signal<Tab>('profile');
@@ -820,7 +820,7 @@ export class SettingsComponent implements OnInit {
       switchMap(val => {
         if (!val || !/^[a-zA-Z0-9_]{3,20}$/.test(val)) return of(null);
         this.checkingUsername.set(true);
-        return this.http.get<{ available: boolean }>(`${environment.apiUrl}/auth/check-username?username=${encodeURIComponent(val)}`);
+        return this.api.checkUsername(val);
       })
     ).subscribe({
       next: r => {
@@ -842,7 +842,7 @@ export class SettingsComponent implements OnInit {
 
   saveUsername(): void {
     if (!this.canSaveUsername()) return;
-    this.http.patch(`${environment.apiUrl}/settings/account`, { username: this.usernameInput }).subscribe({
+    this.api.updateAccount({ username: this.usernameInput }).subscribe({
       next: () => {
         this.usernameSaved.set(true);
         this.authService.fetchProfile().subscribe();
@@ -853,7 +853,7 @@ export class SettingsComponent implements OnInit {
 
   setLang(lang: string): void {
     this.selectedLang = lang;
-    this.http.patch(`${environment.apiUrl}/settings/account`, { preferredLang: lang }).subscribe({
+    this.api.updateAccount({ preferredLang: lang }).subscribe({
       next: () => {
         this.langSaved.set(true);
         this.authService.fetchProfile().subscribe();
@@ -863,7 +863,7 @@ export class SettingsComponent implements OnInit {
   }
 
   saveLang(): void {
-    this.http.patch(`${environment.apiUrl}/settings/account`, { preferredLang: this.selectedLang }).subscribe({
+    this.api.updateAccount({ preferredLang: this.selectedLang }).subscribe({
       next: () => {
         this.langSaved.set(true);
         this.authService.fetchProfile().subscribe();
@@ -875,14 +875,14 @@ export class SettingsComponent implements OnInit {
   setTheme(theme: string): void {
     this.selectedTheme.set(theme);
     localStorage.setItem('mm-theme', theme);
-    this.http.patch(`${environment.apiUrl}/settings/preferences`, { theme }).subscribe();
+    this.api.updatePreferences({ theme }).subscribe();
   }
 
   toggleNotif(type: string): void {
     if (type === 'matches')   this.notifMatches.update(v => !v);
     if (type === 'summary')   this.notifSummary.update(v => !v);
     if (type === 'milestone') this.notifMilestone.update(v => !v);
-    this.http.patch(`${environment.apiUrl}/settings/preferences`, {
+    this.api.updatePreferences({
       notifMatches:   this.notifMatches(),
       notifSummary:   this.notifSummary(),
       notifMilestone: this.notifMilestone(),
@@ -897,7 +897,7 @@ export class SettingsComponent implements OnInit {
 
   deleteAccount(): void {
     if (this.deleteConfirm !== 'DELETE') return;
-    this.http.delete(`${environment.apiUrl}/auth/account`).subscribe({
+    this.api.deleteAccount().subscribe({
       next: () => { this.authService.logout(); },
     });
   }
