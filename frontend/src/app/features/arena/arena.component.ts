@@ -1246,6 +1246,16 @@ export class ArenaComponent implements OnInit, OnDestroy {
   disconnectCountdown = signal(30);
   private disconnectTimer: any;
 
+  // Teardown fns for every socket handler registered in ngOnInit, so they are
+  // all removed on destroy without a hand-maintained event-name list.
+  private socketTeardowns: Array<() => void> = [];
+  private audioCtx?: AudioContext;
+
+  // Register a socket handler and remember how to remove it.
+  private sockOn<T>(event: string, callback: (data: T) => void): void {
+    this.socketTeardowns.push(this.socketService.on<T>(event, callback));
+  }
+
   // Match Found screen
   foundOpponent = signal<{ username: string; avatarUrl: string | null; rating: number; tier: string } | null>(null);
   matchFoundCountdown = signal(5);
@@ -1286,12 +1296,12 @@ export class ArenaComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.socketService.connect();
 
-    this.socketService.on('match:waiting', () => this.state.set('waiting'));
+    this.sockOn('match:waiting', () => this.state.set('waiting'));
     // match:generating is now ignored — match:found handles the transition
-    this.socketService.on('match:generating', () => {});
+    this.sockOn('match:generating', () => {});
 
     // ── Match Found screen ────────────────────────────────────────────────
-    this.socketService.on<{
+    this.sockOn<{
       me: { username: string; avatarUrl: string | null; rating: number; tier: string };
       opponent: { username: string; avatarUrl: string | null; rating: number; tier: string };
       language: string; difficulty: string;
@@ -1329,7 +1339,7 @@ export class ArenaComponent implements OnInit, OnDestroy {
       }, 1000);
     });
 
-    this.socketService.on<{
+    this.sockOn<{
       matchId: string; roomId: string; round: number; winsToWin: number;
       starterCode: string; language: string; challenge: Challenge | null;
     }>('match:started', (data) => {
@@ -1362,7 +1372,7 @@ export class ArenaComponent implements OnInit, OnDestroy {
     });
 
     // Next round: new challenge
-    this.socketService.on<{
+    this.sockOn<{
       round: number; winsToWin: number;
       starterCode: string; language: string; challenge: Challenge;
     }>('match:next_round', (data) => {
@@ -1384,23 +1394,23 @@ export class ArenaComponent implements OnInit, OnDestroy {
       this.openChallengeModal();
     });
 
-    this.socketService.on<{ code: string }>('match:opponent_code', ({ code }) => {
+    this.sockOn<{ code: string }>('match:opponent_code', ({ code }) => {
       this.opponentCode.set(code);
       this.opponentEditor?.setValue(code);
     });
 
-    this.socketService.on('match:judging', () => this.state.set('judging'));
+    this.sockOn('match:judging', () => this.state.set('judging'));
 
-    this.socketService.on<SubmissionResult>('match:submission_result', (result) => {
+    this.sockOn<SubmissionResult>('match:submission_result', (result) => {
       this.myResult.set(result);
     });
 
-    this.socketService.on('match:opponent_submitted', () => {
+    this.sockOn('match:opponent_submitted', () => {
       this.opponentSubmitted.set(true);
     });
 
     // Round finished — show brief result screen
-    this.socketService.on<{
+    this.sockOn<{
       round: number; roundWinnerId: string | null; draw: boolean;
       scores: Record<string, number>;
     }>('match:round_finished', (data) => {
@@ -1414,7 +1424,7 @@ export class ArenaComponent implements OnInit, OnDestroy {
       this.state.set('round_result');
     });
 
-    this.socketService.on<{
+    this.sockOn<{
       winnerId: string | null; draw: boolean; eloChange: number;
       rounds: any[]; player1Id: string; player2Id: string; matchId: string;
     }>('match:finished', (data) => {
@@ -1430,7 +1440,7 @@ export class ArenaComponent implements OnInit, OnDestroy {
     });
 
     // Disconnect events
-    this.socketService.on<{ username: string; reconnectWindow: number }>('match:opponent_disconnected', (data) => {
+    this.sockOn<{ username: string; reconnectWindow: number }>('match:opponent_disconnected', (data) => {
       this.opponentDisconnected.set(true);
       this.disconnectCountdown.set(data.reconnectWindow);
       this.disconnectTimer = setInterval(() => {
@@ -1441,23 +1451,23 @@ export class ArenaComponent implements OnInit, OnDestroy {
       }, 1000);
     });
 
-    this.socketService.on('match:opponent_reconnected', () => {
+    this.sockOn('match:opponent_reconnected', () => {
       this.opponentDisconnected.set(false);
       clearInterval(this.disconnectTimer);
     });
 
-    this.socketService.on('match:opponent_forfeited', () => {
+    this.sockOn('match:opponent_forfeited', () => {
       this.opponentDisconnected.set(false);
       clearInterval(this.disconnectTimer);
     });
 
     // Private room events
-    this.socketService.on<{ code: string }>('room:created', () => {});
-    this.socketService.on<{ message: string }>('room:error', (data) => {
+    this.sockOn<{ code: string }>('room:created', () => {});
+    this.sockOn<{ message: string }>('room:error', (data) => {
       this.roomError.set(data.message);
       this.creatingRoom.set(false);
     });
-    this.socketService.on<{ username: string; count: number }>('room:player_joined', () => {
+    this.sockOn<{ username: string; count: number }>('room:player_joined', () => {
       this.state.set('generating');
     });
   }
@@ -1771,7 +1781,10 @@ export class ArenaComponent implements OnInit, OnDestroy {
   // ── Sound effects ─────────────────────────────────────────────────────────
 
   playMatchFoundSound(): void {
-    const ctx = new AudioContext();
+    // Reuse a single AudioContext — a fresh one per match is never closed and
+    // Chrome caps concurrent contexts (~6), after which playback goes silent.
+    if (!this.audioCtx) this.audioCtx = new AudioContext();
+    const ctx = this.audioCtx;
     const play = (freq: number, start: number, dur: number) => {
       const osc  = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -1791,8 +1804,11 @@ export class ArenaComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     clearInterval(this.modalTimer);
     clearInterval(this.matchFoundTimer);
-    ['match:waiting','match:generating','match:found','match:started','match:next_round','match:opponent_code',
-     'match:judging','match:submission_result','match:opponent_submitted','match:round_finished','match:finished']
-      .forEach((e) => this.socketService.off(e));
+    clearInterval(this.disconnectTimer);
+    // Removes every registered handler (no drift), including the 6 the old
+    // hand-written list missed.
+    this.socketTeardowns.forEach((teardown) => teardown());
+    this.socketTeardowns = [];
+    this.audioCtx?.close();
   }
 }

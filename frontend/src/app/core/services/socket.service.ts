@@ -36,9 +36,13 @@ export class SocketService {
     this.socket?.emit('match:code_update', { roomId, code });
   }
 
-  // Listen for events
-  on<T>(event: string, callback: (data: T) => void): void {
-    this.socket?.on(event, callback);
+  // Listen for an event. Returns a teardown that removes *this* handler, so a
+  // component can unregister exactly what it added (via takeUntilDestroyed or a
+  // teardown list) instead of maintaining a hand-written event-name list that
+  // drifts out of sync with the registrations.
+  on<T>(event: string, callback: (data: T) => void): () => void {
+    this.socket?.on(event, callback as (...args: unknown[]) => void);
+    return () => this.socket?.off(event, callback as (...args: unknown[]) => void);
   }
 
   off(event: string): void {
