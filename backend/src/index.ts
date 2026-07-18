@@ -24,7 +24,11 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
+
+// Single allowlist shared by HTTP CORS and Socket.io CORS, so the socket accepts
+// the same origins the API does. matchmood.dev redirects to www, so www must be
+// allowed for the socket (matchmaking) to connect at all.
+const ALLOWED_ORIGINS = ['https://matchmood.dev', 'https://www.matchmood.dev', 'http://localhost:4200'];
 
 // Behind Railway/Vercel proxies: trust the first hop so req.ip is the real
 // client IP, otherwise the rate limiter keys everyone by the proxy address.
@@ -32,7 +36,7 @@ app.set('trust proxy', 1);
 
 // CORS must be first — before helmet and everything else
 const corsOptions = {
-  origin: ['https://matchmood.dev', 'https://www.matchmood.dev', 'http://localhost:4200'],
+  origin: ALLOWED_ORIGINS,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -105,7 +109,7 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 const httpServer = createServer(app);
 
 export const io = new Server(httpServer, {
-  cors: { origin: FRONTEND_URL, credentials: true },
+  cors: { origin: ALLOWED_ORIGINS, credentials: true },
 });
 
 // Register all socket event handlers
