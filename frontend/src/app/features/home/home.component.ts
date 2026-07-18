@@ -343,7 +343,7 @@ type ModalMode = 'login' | 'signup' | null;
       background-size:64px 64px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 0%,transparent 75%)}
     .cursor-glow{position:fixed;top:0;left:0;width:520px;height:520px;border-radius:50%;pointer-events:none;z-index:0;
       background:radial-gradient(circle,rgba(198,255,61,.10),transparent 60%);transform:translate(-50%,-50%);will-change:transform}
-    .landing > :not(.bg-grid):not(.cursor-glow){position:relative;z-index:1}
+    .landing > :not(.bg-grid):not(.cursor-glow):not(.modal-backdrop){position:relative;z-index:1}
 
     /* buttons */
     .btn{font-family:var(--disp);font-weight:600;font-size:14px;border:1px solid transparent;border-radius:10px;
