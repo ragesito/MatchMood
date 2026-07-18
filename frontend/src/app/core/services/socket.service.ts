@@ -45,10 +45,6 @@ export class SocketService {
     return () => this.socket?.off(event, callback as (...args: unknown[]) => void);
   }
 
-  off(event: string): void {
-    this.socket?.off(event);
-  }
-
   emit(event: string, data?: unknown): void {
     this.socket?.emit(event, data);
   }
