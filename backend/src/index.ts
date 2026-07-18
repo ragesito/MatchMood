@@ -1,5 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
@@ -24,6 +25,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 
+// Behind Railway/Vercel proxies: trust the first hop so req.ip is the real
+// client IP, otherwise the rate limiter keys everyone by the proxy address.
+app.set('trust proxy', 1);
+
 // CORS must be first — before helmet and everything else
 const corsOptions = {
   origin: ['https://matchmood.dev', 'https://www.matchmood.dev', 'http://localhost:4200'],
@@ -45,7 +50,19 @@ app.use(express.json());
 // Initialize Passport (no session — we use JWT instead)
 app.use(passport.initialize());
 
+// Throttle credential endpoints: brute-force protection, and each attempt runs
+// a cost-12 bcrypt hash, so this also caps the CPU-DoS surface.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts, please try again later' },
+});
+
 // Routes
+app.use('/auth/login', authLimiter);
+app.use('/auth/register', authLimiter);
 app.use('/auth', authRoutes);
 app.use('/judge', judgeRoutes);
 app.use('/stripe', stripeRoutes);
