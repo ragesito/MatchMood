@@ -30,6 +30,13 @@ a { text-decoration: none; }
 ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
 * { scrollbar-width: thin; scrollbar-color: #2a2a2a transparent; }
 
+/* Landing uses the lime brand accent for the viewport scrollbar. The class is
+   set on <html> (the viewport scrollbar's element) and removed on leave. */
+html.mm-landing::-webkit-scrollbar { width: 8px; }
+html.mm-landing::-webkit-scrollbar-thumb { background: #C6FF3D; border-radius: 999px; }
+html.mm-landing::-webkit-scrollbar-thumb:hover { background: #b4f024; }
+html.mm-landing { scrollbar-color: #C6FF3D transparent; }
+
 /* ── Global focus states ───────────────────────────────────────────── */
 :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 button:focus-visible,

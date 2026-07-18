@@ -118,12 +118,14 @@ type ModalMode = 'login' | 'signup' | null;
       <!-- ─── Ticker ──────────────────────────────────────────────────── -->
       <div class="ticker">
         <div class="ticker-track">
-          @for (i of [1,2]; track i) {
-            <span>NO FAKE PROBLEMS</span><span class="star">✳</span>
-            <span>NO MEMORIZED SOLUTIONS</span><span class="star">✳</span>
-            <span>NO WHITEBOARD THEATER</span><span class="star">✳</span>
-            <span>JUST YOUR CODE</span><span class="star">✳</span>
-            <span>PROVEN IN 3 MINUTES</span><span class="star">✳</span>
+          @for (i of [1, 2]; track i) {
+            <div class="ticker-set" [attr.aria-hidden]="i === 2 ? 'true' : null">
+              <span>NO FAKE PROBLEMS</span><span class="star">✳</span>
+              <span>NO MEMORIZED SOLUTIONS</span><span class="star">✳</span>
+              <span>NO WHITEBOARD THEATER</span><span class="star">✳</span>
+              <span>JUST YOUR CODE</span><span class="star">✳</span>
+              <span>PROVEN IN 3 MINUTES</span><span class="star">✳</span>
+            </div>
           }
         </div>
       </div>
@@ -410,10 +412,14 @@ type ModalMode = 'login' | 'signup' | null;
       border-radius:10px;padding:9px 13px;box-shadow:0 12px 30px -12px rgba(0,0,0,.8)}
     .chip b{font-weight:700} .chip-1{top:-16px;right:-14px} .chip-2{bottom:-16px;left:-16px}
 
-    /* ticker */
+    /* ticker — two identical sets, translateX(-50%) = exactly one set, so the
+       loop is seamless. Each set's padding-right matches the internal gap so the
+       seam between sets is spaced like everything else (no jump on reset). */
     .ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surf);overflow:hidden;padding:16px 0}
-    .ticker-track{display:flex;gap:26px;align-items:center;white-space:nowrap;width:max-content;animation:scroll 26s linear infinite;font-family:var(--mono);font-weight:600;font-size:14px;letter-spacing:.06em;color:var(--txt)}
-    .ticker-track .star{color:var(--lime)}
+    .ticker-track{display:flex;width:max-content;animation:scroll 26s linear infinite}
+    .ticker:hover .ticker-track{animation-play-state:paused}
+    .ticker-set{display:flex;align-items:center;gap:26px;padding-right:26px;flex-shrink:0;white-space:nowrap;font-family:var(--mono);font-weight:600;font-size:14px;letter-spacing:.06em;color:var(--txt)}
+    .ticker-set .star{color:var(--lime)}
     @keyframes scroll{to{transform:translateX(-50%)}}
 
     /* sections */
@@ -546,7 +552,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Give the page scrollbar the landing's lime accent (scoped, removed on
+    // leave). The viewport scrollbar belongs to <html>, so class goes there.
+    document.documentElement.classList.add('mm-landing');
+  }
 
   ngAfterViewInit(): void {
     const root = this.host.nativeElement as HTMLElement;
@@ -618,6 +628,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    document.documentElement.classList.remove('mm-landing');
     if (this.onMouseMove) window.removeEventListener('mousemove', this.onMouseMove);
     this.gsapCtx?.revert(); // kills every tween + ScrollTrigger created above
   }
