@@ -9,8 +9,10 @@ const schema = z.object({
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
 
   PORT: z.string().optional(),
-  FRONTEND_URL: z.string().url().optional(),
-  BACKEND_URL: z.string().url().optional(),
+  // Not .url() — a missing scheme shouldn't crash-loop the whole API. These are
+  // format-warned below instead (they only affect OAuth callbacks / CORS).
+  FRONTEND_URL: z.string().optional(),
+  BACKEND_URL: z.string().optional(),
 
   GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_CLIENT_SECRET: z.string().optional(),
@@ -35,6 +37,16 @@ export const env = parsed.data;
 
 if (env.JWT_SECRET.length < 32) {
   console.warn('Warning: JWT_SECRET is shorter than 32 characters — use a stronger secret in production.');
+}
+
+// Warn (don't crash) if a URL var is set but has no http(s) scheme — OAuth
+// callbacks and CORS need the full origin, but a bad value here shouldn't take
+// the whole API down.
+for (const key of ['FRONTEND_URL', 'BACKEND_URL'] as const) {
+  const value = env[key];
+  if (value && !/^https?:\/\//.test(value)) {
+    console.warn(`Warning: ${key} ("${value}") is not a full URL — it should start with https://`);
+  }
 }
 
 // Warn (don't crash) when an integration's keys are absent: that feature is
