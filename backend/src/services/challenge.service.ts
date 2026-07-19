@@ -159,16 +159,19 @@ async function generateWithAI(level: Level, language: string): Promise<ReturnTyp
     throw new Error('AI response missing solution / runnerCode / testCases');
   }
 
-  // Validate the challenge before serving it. A wrong expectedOutput makes BOTH
-  // players score 0 → the match ends in a perpetual draw, so we must be sure a
-  // correct answer wins. Run the AI's reference solution through Judge0 and
-  // cross-check its real output against the AI's stated expectedOutput:
-  //   - solution won't run cleanly  -> reject (buggy solution/runner)
-  //   - runs but disagrees with the stated output -> reject (one of them is
-  //     wrong; we can't tell which, so don't trust the challenge)
-  //   - runs AND agrees            -> both independently produced the same
-  //     answer, so it's almost certainly correct — use it.
-  // Rejection throws, which triggers a regenerate (and finally a curated fallback).
+  // Compute the expected outputs before serving the challenge. A wrong
+  // expectedOutput makes BOTH players score 0 → the match ends in a perpetual
+  // draw, so the outputs must be trustworthy. The AI is unreliable at hand-
+  // computing them (that WAS the draw bug), but it writes a working reference
+  // solution. So the reference solution — executed in the sandbox — is our
+  // source of truth: run it through Judge0 and OVERWRITE the AI's stated
+  // outputs with the real computed ones.
+  //   - solution won't run cleanly (compile/runtime error) -> reject: we can't
+  //     compute a trustworthy output, so regenerate.
+  //   - solution runs on every test case -> trust the computed output, whatever
+  //     the AI claimed it would be. Do NOT require agreement with the AI's
+  //     hand-written output — it's wrong often enough that demanding a match
+  //     just rejects good challenges and falls back to the wrong language.
   const languageId = JUDGE0_LANG[language] ?? 63;
   const fullCode = assembleFullCode(generated.solution, generated.runnerCode);
   const runs = await Promise.all(
@@ -176,10 +179,6 @@ async function generateWithAI(level: Level, language: string): Promise<ReturnTyp
   );
   if (runs.some((r) => !r.ok)) {
     throw new Error('Reference solution failed to run cleanly on a test case');
-  }
-  const agrees = runs.every((r, i) => r.output === (generated.testCases[i].expectedOutput ?? '').trim());
-  if (!agrees) {
-    throw new Error('Reference solution and stated test cases disagree — regenerating');
   }
   const testCases = generated.testCases.map((tc, i) => ({ input: tc.input, expectedOutput: runs[i].output }));
 
