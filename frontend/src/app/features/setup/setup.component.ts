@@ -37,8 +37,12 @@ const SKILL_LEVELS = [
 
         <!-- Logo -->
         <div class="setup-logo">
-          <span class="logo-mark">⚡</span>
-          <span class="logo-text">MatchMood</span>
+          <svg width="26" height="26" viewBox="0 0 32 32" aria-label="MatchMood">
+            <path d="M8 9 L14 16 L8 23" fill="none" stroke="var(--lime)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M24 9 L18 16 L24 23" fill="none" stroke="var(--magenta)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="15.1" y="9.5" width="1.8" height="13" rx="0.9" fill="var(--text-primary)"/>
+          </svg>
+          <span class="logo-text">match<span style="color:var(--lime)">mood</span></span>
         </div>
 
         <!-- Progress bars -->
@@ -127,7 +131,7 @@ const SKILL_LEVELS = [
               </div>
             </div>
             <div class="username-preview">
-              matchmood.app/u/<strong>{{ usernameInput || 'your_handle' }}</strong>
+              matchmood.dev/u/<strong>{{ usernameInput || 'your_handle' }}</strong>
             </div>
             <div class="btn-row">
               <button class="btn-secondary" (click)="prevStep()">← Back</button>
@@ -200,7 +204,7 @@ const SKILL_LEVELS = [
       font-weight: 700;
       color: var(--text-primary, #fff);
     }
-    .logo-mark { color: var(--green, #22c55e); font-size: 20px; }
+    .setup-logo .logo-text { font-family: var(--font-mono); font-size: 17px; }
 
     /* Progress bars */
     .progress-bars {
@@ -215,8 +219,8 @@ const SKILL_LEVELS = [
       border-radius: 2px;
       transition: background 250ms ease;
     }
-    .prog-bar.active { background: var(--green, #22c55e); }
-    .prog-bar.done   { background: var(--green-dim, #16a34a); }
+    .prog-bar.active { background: var(--lime, var(--lime)); }
+    .prog-bar.done   { background: var(--lime-dim, var(--lime-dim)); }
 
     /* Step label */
     .step-label {
@@ -281,9 +285,9 @@ const SKILL_LEVELS = [
       color: var(--text-primary, #fff);
     }
     .lang-btn.selected {
-      border-color: var(--green, #22c55e);
-      background: var(--green-glow, rgba(34,197,94,0.12));
-      color: var(--green, #22c55e);
+      border-color: var(--lime, var(--lime));
+      background: var(--lime-glow, rgba(198,255,61,0.12));
+      color: var(--lime, var(--lime));
     }
     .lang-icon {
       font-size: 10px;
@@ -295,7 +299,7 @@ const SKILL_LEVELS = [
       letter-spacing: 0.05em;
     }
     .lang-btn.selected .lang-icon {
-      background: var(--green-glow-strong, rgba(34,197,94,0.2));
+      background: var(--lime-glow-strong, rgba(198,255,61,0.2));
     }
     .lang-label { font-size: 11px; font-weight: 500; }
 
@@ -319,8 +323,8 @@ const SKILL_LEVELS = [
       border-color: var(--border-bright, #2a2a2a);
     }
     .skill-btn.selected {
-      border-color: var(--green, #22c55e);
-      background: var(--green-glow, rgba(34,197,94,0.12));
+      border-color: var(--lime, var(--lime));
+      background: var(--lime-glow, rgba(198,255,61,0.12));
     }
     .skill-name {
       font-size: 15px;
@@ -332,7 +336,7 @@ const SKILL_LEVELS = [
       font-size: 13px;
       color: var(--text-muted, #52525b);
     }
-    .skill-btn.selected .skill-name { color: var(--green, #22c55e); }
+    .skill-btn.selected .skill-name { color: var(--lime, var(--lime)); }
 
     /* Username input */
     .input-wrap {
@@ -352,12 +356,12 @@ const SKILL_LEVELS = [
       font-family: inherit;
     }
     .username-input::placeholder { color: var(--text-muted, #52525b); }
-    .username-input:focus { border-color: var(--green, #22c55e); }
-    .username-input.has-value { color: var(--green, #22c55e); }
+    .username-input:focus { border-color: var(--lime, var(--lime)); }
+    .username-input.has-value { color: var(--lime, var(--lime)); }
     .input-status { height: 20px; margin-top: 6px; font-size: 12px; }
     .status-checking { color: var(--text-muted, #52525b); }
-    .status-error { color: var(--red, #ef4444); }
-    .status-ok    { color: var(--green, #22c55e); }
+    .status-error { color: var(--red, var(--magenta)); }
+    .status-ok    { color: var(--lime, var(--lime)); }
 
     .username-preview {
       font-size: 13px;
@@ -368,7 +372,7 @@ const SKILL_LEVELS = [
 
     /* Buttons */
     .btn-primary {
-      background: var(--green, #22c55e);
+      background: var(--lime, var(--lime));
       color: #000;
       border: none;
       border-radius: 8px;
@@ -379,7 +383,7 @@ const SKILL_LEVELS = [
       width: 100%;
       transition: background 150ms ease, transform 100ms ease;
     }
-    .btn-primary:hover:not(:disabled) { background: var(--green-dim, #16a34a); }
+    .btn-primary:hover:not(:disabled) { background: var(--lime-dim, var(--lime-dim)); }
     .btn-primary:active:not(:disabled) { transform: scale(0.98); }
     .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-primary.loading { opacity: 0.7; }

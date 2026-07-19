@@ -136,11 +136,11 @@ import { Title, Meta } from '@angular/platform-browser';
 
     /* Loading / error */
     .full-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 80px 24px; }
-    .spin { width: 32px; height: 32px; border: 2px solid var(--border-bright); border-top-color: var(--green); border-radius: 50%; animation: spin .8s linear infinite; }
+    .spin { width: 32px; height: 32px; border: 2px solid var(--border-bright); border-top-color: var(--lime); border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .err-code { font-size: 80px; font-weight: 900; color: var(--border); line-height: 1; }
     .err-msg  { font-size: 18px; color: var(--text-muted); }
-    .err-back { color: var(--green); text-decoration: none; font-size: 14px; }
+    .err-back { color: var(--lime); text-decoration: none; font-size: 14px; }
 
     /* Hero */
     .hero { background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%); border-bottom: 1px solid var(--border); padding: 48px 24px 40px; }
@@ -155,11 +155,11 @@ import { Title, Meta } from '@angular/platform-browser';
       position: absolute;
       inset: -3px;
       border-radius: 50%;
-      background: conic-gradient(var(--green), transparent, var(--green));
+      background: conic-gradient(var(--lime), transparent, var(--lime));
       animation: ringRotate 3s linear infinite;
       z-index: -1;
     }
-    .avatar-wrap.ring-enterprise::before { background: conic-gradient(#a78bfa, transparent, #a78bfa); }
+    .avatar-wrap.ring-enterprise::before { background: conic-gradient(var(--magenta), transparent, var(--magenta)); }
     @keyframes ringRotate { to { transform: rotate(360deg); } }
 
     /* Info */
@@ -169,18 +169,18 @@ import { Title, Meta } from '@angular/platform-browser';
     .at { color: var(--text-muted); font-weight: 400; }
 
     .tier-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
-    .tier-premium    { background: var(--green-glow); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
-    .tier-enterprise { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+    .tier-premium    { background: var(--lime-glow); color: var(--lime); border: 1px solid rgba(198,255,61,0.25); }
+    .tier-enterprise { background: rgba(255,61,119,0.12); color: var(--magenta); border: 1px solid rgba(255,61,119,0.25); }
 
     .meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .rank-pill { font-size: 12px; font-weight: 700; background: var(--bg-elevated); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; color: var(--text-muted); }
-    .elo-val   { font-size: 20px; font-weight: 900; color: var(--green); letter-spacing: -0.5px; }
+    .elo-val   { font-size: 20px; font-weight: 900; color: var(--lime); letter-spacing: -0.5px; }
     .joined    { font-size: 13px; color: var(--text-muted); }
 
     /* Actions */
     .hero-actions { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
     .btn-challenge {
-      background: var(--green);
+      background: var(--lime);
       color: #000;
       font-weight: 700;
       font-size: 14px;
@@ -191,7 +191,7 @@ import { Title, Meta } from '@angular/platform-browser';
       transition: background 150ms ease;
       white-space: nowrap;
     }
-    .btn-challenge:hover { background: var(--green-dim); }
+    .btn-challenge:hover { background: var(--lime-dim); }
     .btn-share {
       background: transparent;
       border: 1px solid var(--border-bright);
@@ -206,7 +206,7 @@ import { Title, Meta } from '@angular/platform-browser';
 
     /* Sections */
     .section { max-width: 800px; margin: 0 auto; padding: 32px 24px 0; width: 100%; box-sizing: border-box; }
-    .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin: 0 0 14px; }
+    .section-title { font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin: 0 0 14px; }
 
     /* Stats */
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
@@ -219,11 +219,11 @@ import { Title, Meta } from '@angular/platform-browser';
       transition: border-color 150ms ease, transform 150ms ease;
     }
     .stat-box:hover { border-color: var(--border-bright); transform: translateY(-2px); }
-    .stat-num  { font-size: 28px; font-weight: 900; letter-spacing: -1px; color: var(--text-primary); }
+    .stat-num  { font-family: var(--font-mono); font-size: 28px; font-weight: 900; letter-spacing: -1px; color: var(--text-primary); }
     .stat-lbl  { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 6px; }
-    .green { color: var(--green); }
+    .green { color: var(--lime); }
     .amber { color: var(--amber); }
-    .red   { color: var(--red); }
+    .red   { color: var(--magenta); }
 
     /* Match history */
     .matches-list { display: flex; flex-direction: column; gap: 6px; }
@@ -239,16 +239,16 @@ import { Title, Meta } from '@angular/platform-browser';
     }
     .match-row:hover { border-color: var(--border-bright); }
     .result-pill { width: 24px; height: 24px; border-radius: 6px; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .result-win  { background: var(--green-glow); color: var(--green); }
-    .result-loss { background: rgba(239,68,68,0.12); color: var(--red); }
+    .result-win  { background: var(--lime-glow); color: var(--lime); }
+    .result-loss { background: rgba(255,61,119,0.12); color: var(--magenta); }
     .result-draw { background: var(--bg-elevated); color: var(--text-muted); }
     .match-lang  { font-size: 13px; color: var(--text-secondary); flex: 1; }
-    .match-elo   { font-size: 13px; font-weight: 700; color: var(--text-muted); }
-    .match-elo.pos { color: var(--green); }
-    .match-elo.neg { color: var(--red); }
+    .match-elo   { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--text-muted); }
+    .match-elo.pos { color: var(--lime); }
+    .match-elo.neg { color: var(--magenta); }
     .match-date  { font-size: 12px; color: var(--text-muted); }
     .history-note { margin-top: 10px; text-align: center; font-size: 13px; color: var(--text-muted); }
-    .note-link   { color: var(--green); text-decoration: none; font-weight: 600; }
+    .note-link   { color: var(--lime); text-decoration: none; font-weight: 600; }
 
     /* CTA strip */
     .cta-strip { margin-top: 48px; border-top: 1px solid var(--border); background: var(--bg-surface); padding: 28px 24px; }
@@ -257,7 +257,7 @@ import { Title, Meta } from '@angular/platform-browser';
     .cta-copy strong { font-size: 16px; color: var(--text-primary); }
     .cta-copy span   { font-size: 13px; color: var(--text-muted); }
     .cta-btn {
-      background: var(--green);
+      background: var(--lime);
       color: #000;
       font-weight: 700;
       text-decoration: none;
@@ -267,7 +267,7 @@ import { Title, Meta } from '@angular/platform-browser';
       transition: background 150ms ease;
       white-space: nowrap;
     }
-    .cta-btn:hover { background: var(--green-dim); }
+    .cta-btn:hover { background: var(--lime-dim); }
 
     @media (max-width: 640px) {
       .hero-inner    { flex-direction: column; align-items: flex-start; }
