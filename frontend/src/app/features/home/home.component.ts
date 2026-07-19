@@ -510,13 +510,30 @@ type ModalMode = 'login' | 'signup' | null;
     @keyframes sp{to{transform:rotate(360deg)}}
 
     @media(max-width:940px){
+      .landing{overflow-x:hidden}
       .hero{grid-template-columns:1fr;padding:56px 24px 70px}
       .how,.companies .co-grid{grid-template-columns:1fr;gap:36px}
       .grid-4,.grid-3,.stats{grid-template-columns:1fr 1fr}
       .nav-links{display:none} .nav{padding:16px 22px} .sec{padding:72px 24px}
       .chip{display:none}
+      .trust{flex-wrap:wrap;row-gap:6px}
+      .stage,.term{max-width:100%;min-width:0}
+      .code{overflow-x:auto}
+      .lede{max-width:100%}
     }
-    @media(max-width:560px){ .grid-4,.grid-3,.stats{grid-template-columns:1fr} .actions{flex-direction:column} .actions .btn{width:100%;justify-content:center} }
+    @media(max-width:560px){
+      .grid-4,.grid-3,.stats{grid-template-columns:1fr}
+      .actions{flex-direction:column}
+      .actions .btn{width:100%;justify-content:center}
+      .title{font-size:clamp(40px,13vw,60px)}
+      .nav-user{display:none}
+      .nav-cta .btn-lg{padding:11px 16px}
+      .hero{padding:44px 18px 60px}
+      .sec{padding:56px 18px}
+      .stats{padding:44px 18px}
+      .foot{padding:24px 18px}
+      .final{padding:80px 18px}
+    }
   `],
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {

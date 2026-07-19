@@ -1109,6 +1109,9 @@ interface SubmissionResult {
       .topbar { padding: 8px 12px; }
       .top-elo-chip { display: none; }
       .tc-title { display: none; }
+      .mode-navbar { justify-content: flex-start; overflow-x: auto; padding: 10px 14px; }
+      .mode-tab { flex-shrink: 0; }
+      .screen-idle { padding: 0 14px; }
       .challenge-bar { flex-wrap: wrap; }
       .mf-vs-row, .vs-avatars { gap: 12px; }
       .mf-avatar-wrap, .vs-avatar-wrap-new { transform: scale(0.85); }

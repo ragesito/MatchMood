@@ -260,6 +260,7 @@ import { FaqModalService } from '../../core/services/faq-modal.service';
     .faq-btn:hover { color: #fff; border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.04); }
 
     @media (max-width: 768px) {
+      .page { padding: 32px 16px; overflow-x: hidden; }
       .plans { flex-direction: column; align-items: center; }
       .plan  { width: 100%; max-width: 400px; }
     }
