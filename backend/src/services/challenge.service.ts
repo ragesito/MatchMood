@@ -8,7 +8,41 @@ interface GeneratedChallenge {
   description: string;
   starterCode: string;
   runnerCode: string;
+  // A correct reference solution — used to COMPUTE the expected outputs (the AI
+  // is unreliable at hand-computing them). Never sent to the client.
+  solution: string;
   testCases: Array<{ input: string; expectedOutput: string }>;
+}
+
+const JUDGE0_LANG: Record<string, number> = {
+  javascript: 63, typescript: 74, python: 71, java: 62, cpp: 54, go: 60, rust: 73,
+};
+
+// Run one program+stdin through Judge0. Returns the trimmed stdout, or ok:false
+// if it didn't run cleanly (compile/runtime error, timeout, or Judge0 down).
+async function runViaJudge0(fullCode: string, languageId: number, stdin: string): Promise<{ ok: boolean; output: string }> {
+  try {
+    const res = await fetch('https://judge0-ce.p.rapidapi.com/submissions?wait=true', {
+      method: 'POST',
+      headers: {
+        'Content-Type':    'application/json',
+        'X-RapidAPI-Key':  process.env.JUDGE0_API_KEY!,
+        'X-RapidAPI-Host': process.env.JUDGE0_API_HOST!,
+      },
+      body: JSON.stringify({ source_code: fullCode, language_id: languageId, stdin }),
+    });
+    const result = await res.json() as any;
+    if (result.status?.id !== 3) return { ok: false, output: '' };
+    return { ok: true, output: (result.stdout ?? '').trim() };
+  } catch {
+    return { ok: false, output: '' };
+  }
+}
+
+function assembleFullCode(solution: string, runnerCode: string): string {
+  return runnerCode.includes('// SOLVE_HERE')
+    ? runnerCode.replace('// SOLVE_HERE', solution)
+    : `${solution}\n\n${runnerCode}`;
 }
 
 // ── Per-language code structure guide for the AI ─────────────────────────────
@@ -85,8 +119,9 @@ Respond ONLY with valid JSON in this exact format:
 {
   "title": "Challenge title",
   "description": "Clear problem description with examples",
-  "starterCode": "...(full starter code in ${language} following the example above)...",
-  "runnerCode": "...(runner code in ${language} following the example above — empty string for go/rust/java)...",
+  "starterCode": "...(full starter code in ${language} — signature + empty placeholder body ONLY)...",
+  "runnerCode": "...(runner code in ${language} following the example above)...",
+  "solution": "...(a CORRECT, working ${language} solution — same shape as starterCode but with the real algorithm filled in. This is used to compute the expected outputs and is never shown to players.)...",
   "testCases": [
     { "input": "...", "expectedOutput": "..." },
     { "input": "...", "expectedOutput": "..." },
@@ -120,6 +155,34 @@ async function generateWithAI(level: Level, language: string): Promise<ReturnTyp
   const raw = response.choices[0].message.content ?? '{}';
   const generated = JSON.parse(raw) as GeneratedChallenge;
 
+  if (!generated.solution || !generated.runnerCode || !generated.testCases?.length) {
+    throw new Error('AI response missing solution / runnerCode / testCases');
+  }
+
+  // Validate the challenge before serving it. A wrong expectedOutput makes BOTH
+  // players score 0 → the match ends in a perpetual draw, so we must be sure a
+  // correct answer wins. Run the AI's reference solution through Judge0 and
+  // cross-check its real output against the AI's stated expectedOutput:
+  //   - solution won't run cleanly  -> reject (buggy solution/runner)
+  //   - runs but disagrees with the stated output -> reject (one of them is
+  //     wrong; we can't tell which, so don't trust the challenge)
+  //   - runs AND agrees            -> both independently produced the same
+  //     answer, so it's almost certainly correct — use it.
+  // Rejection throws, which triggers a regenerate (and finally a curated fallback).
+  const languageId = JUDGE0_LANG[language] ?? 63;
+  const fullCode = assembleFullCode(generated.solution, generated.runnerCode);
+  const runs = await Promise.all(
+    generated.testCases.map((tc) => runViaJudge0(fullCode, languageId, tc.input)),
+  );
+  if (runs.some((r) => !r.ok)) {
+    throw new Error('Reference solution failed to run cleanly on a test case');
+  }
+  const agrees = runs.every((r, i) => r.output === (generated.testCases[i].expectedOutput ?? '').trim());
+  if (!agrees) {
+    throw new Error('Reference solution and stated test cases disagree — regenerating');
+  }
+  const testCases = generated.testCases.map((tc, i) => ({ input: tc.input, expectedOutput: runs[i].output }));
+
   const challenge = await prisma.challenge.create({
     data: {
       title: generated.title,
@@ -127,7 +190,7 @@ async function generateWithAI(level: Level, language: string): Promise<ReturnTyp
       level,
       language,
       starterCode: generated.starterCode,
-      testCases: generated.testCases,
+      testCases,
       isAiGenerated: true,
     },
   });
