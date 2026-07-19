@@ -1007,6 +1007,42 @@ function countUp(el: HTMLElement, target: number, duration = 700) {
       from { opacity: 0; transform: translateY(4px); }
       to   { opacity: 1; transform: none; }
     }
+
+    /* ── Responsive ─────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .db-root { padding: 16px 14px; overflow-x: hidden; }
+      .topbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .panels { flex-direction: column; }
+      .panel { min-width: 0; }
+      .panel-left, .panel-right { width: auto; min-width: 0; }
+      .arena-hero, .ah-left { min-width: 0; }
+      .ah-desc { max-width: 100%; }
+      .sub-row { flex-direction: column; }
+      .sub-card { border-right: none !important; box-shadow: none !important; border-bottom: 1px solid rgba(198,255,61,0.2); }
+      .sub-card:last-child { border-bottom: none; }
+      .stats-strip { flex-wrap: wrap; }
+      .stat-item { flex: 1 1 44%; min-width: 130px; }
+      .stat-div { display: none; }
+      .stat-rating { flex: 1 1 100%; }
+      .bottom-row { flex-direction: column; }
+      .plans-row { flex-direction: column; }
+      .ah-body { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .ah-title { font-size: 24px; }
+      .arena-hero { padding: 18px 16px; }
+      .panel-hd { padding: 12px 14px; }
+      .ah-pills { flex-wrap: wrap; }
+      .lb-list { overflow-x: hidden; }
+    }
+    @media (max-width: 560px) {
+      .stat-item { flex: 1 1 100%; }
+      .topbar-title { font-size: 19px; }
+      .lb-podium { padding: 16px 4px 0; gap: 0; }
+      .pod-av-gold { width: 48px; height: 48px; }
+      .pod-av-silver { width: 40px; height: 40px; }
+      .pod-av-bronze { width: 34px; height: 34px; }
+      .pod-name { max-width: 60px; font-size: 10px; }
+      .ah-title { font-size: 22px; }
+    }
   `],
 })
 export class DashboardComponent implements OnInit, AfterViewInit {

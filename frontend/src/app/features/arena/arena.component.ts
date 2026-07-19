@@ -1101,11 +1101,17 @@ interface SubmissionResult {
 
     /* ── Mobile responsive ────────────────────────────────────────── */
     @media (max-width: 768px) {
-      .editors-split { flex-direction: column; }
-      .editor-pane { min-height: 240px; }
-      .editor-pane:first-child { border-right: none; border-bottom: 1px solid #161616; }
+      .editors { flex-direction: column; overflow-y: auto; }
+      .editor-col { min-height: 260px; }
       .topbar { padding: 8px 12px; }
-      .top-user, .top-elo { display: none; }
+      .top-elo-chip { display: none; }
+      .tc-title { display: none; }
+      .challenge-bar { flex-wrap: wrap; }
+      .mf-vs-row, .vs-avatars { gap: 12px; }
+      .mf-avatar-wrap, .vs-avatar-wrap-new { transform: scale(0.85); }
+      .idle-card { padding: 24px 16px; }
+      .postmatch { padding: 0 12px; }
+      .pm-code-cols { grid-template-columns: 1fr; }
     }
 
     /* ── Post-match screen ────────────────────────────────────────── */

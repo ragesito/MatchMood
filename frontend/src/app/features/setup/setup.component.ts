@@ -405,6 +405,10 @@ const SKILL_LEVELS = [
       color: var(--text-primary, #fff);
     }
     .btn-row .btn-primary { flex: 1; width: auto; }
+
+    @media (max-width: 560px) {
+      .lang-grid { grid-template-columns: repeat(2, 1fr); }
+    }
   `],
 })
 export class SetupComponent {
