@@ -151,7 +151,7 @@ import { FaqModalService } from '../../core/services/faq-modal.service';
 
     /* Hero */
     .hero { text-align: center; margin-bottom: 40px; }
-    .hero-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); margin-bottom: 16px; }
+    .hero-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--lime); margin-bottom: 16px; }
     h1 { font-size: 40px; font-weight: 900; letter-spacing: -1.5px; margin: 0 0 14px; color: var(--text-primary); }
     .hero-sub { font-size: 16px; color: var(--text-muted); margin: 0; }
 
@@ -170,8 +170,8 @@ import { FaqModalService } from '../../core/services/faq-modal.service';
     .billing-opt.active { background: rgba(255,255,255,0.08); color: var(--text-primary); }
     .save-badge {
       font-size: 10px; font-weight: 800; letter-spacing: 0.05em;
-      background: rgba(34,197,94,0.15); color: var(--green);
-      padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(34,197,94,0.25);
+      background: rgba(198,255,61,0.15); color: var(--lime);
+      padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(198,255,61,0.25);
     }
 
     /* Plans */
@@ -189,44 +189,44 @@ import { FaqModalService } from '../../core/services/faq-modal.service';
     .plan.dimmed:hover { transform: none; }
 
     .plan-featured {
-      border-color: rgba(34,197,94,0.3);
+      border-color: rgba(198,255,61,0.3);
       background: linear-gradient(160deg, #030d03 0%, var(--bg-surface) 60%);
     }
-    .plan-featured:hover { border-color: rgba(34,197,94,0.5); }
+    .plan-featured:hover { border-color: rgba(198,255,61,0.5); }
 
     .plan-enterprise {
-      border-color: rgba(139,92,246,0.2);
+      border-color: rgba(255,61,119,0.2);
       background: linear-gradient(160deg, #08040f 0%, var(--bg-surface) 60%);
     }
-    .plan-enterprise:hover { border-color: rgba(139,92,246,0.4); }
+    .plan-enterprise:hover { border-color: rgba(255,61,119,0.4); }
 
     .current-checkmark {
       position: absolute; top: 14px; right: 14px;
-      font-size: 10px; font-weight: 700; color: var(--green);
+      font-size: 10px; font-weight: 700; color: var(--lime);
       text-transform: uppercase; letter-spacing: 0.05em;
     }
     .popular-badge {
       position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-      background: var(--green); color: #000; padding: 4px 16px;
+      background: var(--lime); color: #000; padding: 4px 16px;
       border-radius: 20px; font-size: 11px; font-weight: 800;
       white-space: nowrap; letter-spacing: 0.05em;
     }
 
     .plan-top { margin-bottom: 24px; margin-top: 8px; }
     .plan-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 10px; }
-    .premium-name    { color: var(--green); }
-    .enterprise-name { color: #a78bfa; }
-    .plan-price  { font-size: 48px; font-weight: 900; letter-spacing: -2px; line-height: 1; margin-bottom: 4px; color: var(--text-primary); }
+    .premium-name    { color: var(--lime); }
+    .enterprise-name { color: var(--magenta); }
+    .plan-price  { font-family: var(--font-mono); font-size: 48px; font-weight: 900; letter-spacing: -2px; line-height: 1; margin-bottom: 4px; color: var(--text-primary); }
     .plan-period { font-size: 16px; font-weight: 400; color: var(--text-muted); letter-spacing: 0; }
-    .annual-note { font-size: 11px; color: var(--green); margin-bottom: 6px; font-weight: 600; }
+    .annual-note { font-size: 11px; color: var(--lime); margin-bottom: 6px; font-weight: 600; }
     .plan-tagline { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 
     .features { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
     .features li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text-muted); line-height: 1.4; }
     .features li strong { color: var(--text-secondary); font-weight: 600; }
     .check        { color: var(--border-bright); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-    .check-green  { color: var(--green); }
-    .check-purple { color: #a78bfa; }
+    .check-green  { color: var(--lime); }
+    .check-purple { color: var(--magenta); }
 
     .plan-action { margin-top: auto; }
     .btn-upgrade {
@@ -237,12 +237,12 @@ import { FaqModalService } from '../../core/services/faq-modal.service';
     .btn-upgrade:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
     .btn-upgrade:active:not(:disabled) { transform: scale(0.98); }
     .btn-upgrade:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-premium    { background: var(--green); color: #000; }
-    .btn-enterprise { background: #7c3aed; color: #fff; }
+    .btn-premium    { background: var(--lime); color: #000; }
+    .btn-enterprise { background: var(--magenta); color: #0A0B0D; }
 
     .badge-current { text-align: center; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 600; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); }
-    .badge-current.badge-premium    { background: var(--green-glow); color: var(--green); border-color: rgba(34,197,94,0.25); }
-    .badge-current.badge-enterprise { background: rgba(139,92,246,0.1); color: #a78bfa; border-color: rgba(139,92,246,0.25); }
+    .badge-current.badge-premium    { background: var(--lime-glow); color: var(--lime); border-color: rgba(198,255,61,0.25); }
+    .badge-current.badge-enterprise { background: rgba(255,61,119,0.1); color: var(--magenta); border-color: rgba(255,61,119,0.25); }
     .badge-included { text-align: center; padding: 11px; border-radius: 8px; font-size: 13px; color: var(--text-muted); background: var(--bg-elevated); border: 1px solid var(--border); }
 
     /* Footer row */

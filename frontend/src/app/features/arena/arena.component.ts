@@ -605,7 +605,10 @@ interface SubmissionResult {
 
             <!-- Visual card (what gets rendered to image) -->
             <div class="share-card" #shareCard>
-              <div class="sc-logo">⚡ MatchMood</div>
+              <div class="sc-head">
+                <span class="sc-dot"></span><span class="sc-dot"></span><span class="sc-dot"></span>
+                <span class="sc-logo">arena://result · matchmood</span>
+              </div>
               <div class="sc-vs">
                 <span class="sc-user">&#64;{{ authService.user()?.username }}</span>
                 <span class="sc-sep">vs</span>
@@ -1120,18 +1123,18 @@ interface SubmissionResult {
 
     /* Hero */
     .pm-hero { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; animation: slideUp .35s ease; }
-    .pm-result-badge { font-family: var(--font-mono); font-size: 48px; font-weight: 900; letter-spacing: -2px; line-height: 1; text-transform: uppercase; }
-    .pm-result-badge.win  { color: var(--lime); }
+    .pm-result-badge { font-family: var(--font-display); font-size: clamp(56px, 9vw, 84px); font-weight: 700; letter-spacing: -0.04em; line-height: 1; text-transform: uppercase; }
+    .pm-result-badge.win  { color: var(--lime); text-shadow: 0 0 50px rgba(198,255,61,0.45); }
     .pm-result-badge.draw { color: var(--text-secondary, #a1a1aa); }
-    .pm-result-badge.loss { color: var(--red, var(--magenta)); }
-    .pm-elo-delta { font-family: var(--font-mono); font-size: 22px; font-weight: 800; padding: 6px 22px; border-radius: 10px; }
+    .pm-result-badge.loss { color: var(--magenta); text-shadow: 0 0 50px rgba(255,61,119,0.4); }
+    .pm-elo-delta { font-family: var(--font-mono); font-size: 28px; font-weight: 700; padding: 8px 24px; border-radius: 999px; margin-top: 4px; }
     .pm-elo-delta.win  { background: var(--lime-glow); color: var(--lime); }
     .pm-elo-delta.draw { background: var(--bg-elevated, #141414); color: var(--text-secondary, #a1a1aa); }
-    .pm-elo-delta.loss { background: rgba(255,61,119,0.12); color: var(--red, var(--magenta)); }
+    .pm-elo-delta.loss { background: rgba(255,61,119,0.12); color: var(--magenta); }
     .pm-new-elo { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted, #52525b); }
     .pm-rounds-summary { display: flex; align-items: center; gap: 16px; margin-top: 4px; }
-    .pm-rs-you { font-family: var(--font-mono); font-size: 36px; font-weight: 900; color: var(--lime); }
-    .pm-rs-opp { font-family: var(--font-mono); font-size: 36px; font-weight: 900; color: var(--text-secondary, #a1a1aa); }
+    .pm-rs-you { font-family: var(--font-mono); font-size: 40px; font-weight: 700; color: var(--lime); }
+    .pm-rs-opp { font-family: var(--font-mono); font-size: 40px; font-weight: 700; color: var(--magenta); }
     .pm-rs-sep { font-size: 24px; color: var(--text-muted, #52525b); }
 
     /* Breakdown */
@@ -1143,7 +1146,7 @@ interface SubmissionResult {
     .pm-tab.active { background: var(--bg-elevated, #141414); border-color: var(--border-bright, #2a2a2a); color: var(--text-primary, #fff); }
     .tab-badge { font-size: 10px; font-weight: 700; padding: 2px 5px; border-radius: 4px; }
     .tab-badge.win  { background: var(--lime-glow-strong); color: var(--lime); }
-    .tab-badge.loss { background: rgba(255,61,119,0.15); color: var(--red, var(--magenta)); }
+    .tab-badge.loss { background: rgba(255,61,119,0.15); color: var(--magenta); }
     .tab-badge.draw { background: var(--bg-elevated, #141414); color: var(--text-muted, #52525b); }
     .pm-round-detail { display: flex; flex-direction: column; gap: 12px; }
     .pm-round-header { display: flex; justify-content: space-between; align-items: center; }
@@ -1156,7 +1159,7 @@ interface SubmissionResult {
 
     /* Actions */
     .pm-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
-    .pm-btn-primary { border: none; color: #000; font-weight: 700; padding: 13px 28px; border-radius: 10px; font-size: 15px; cursor: pointer; transition: filter .18s, transform 100ms ease; }
+    .pm-btn-primary { border: none; color: #0A0B0D; font-family: var(--font-mono); font-weight: 700; padding: 13px 30px; border-radius: 999px; font-size: 14px; cursor: pointer; transition: filter .18s, transform 100ms ease; }
     .pm-btn-primary:hover { filter: brightness(.88); }
     .pm-btn-primary:active { transform: scale(0.98); }
     .pm-btn-secondary { background: var(--bg-elevated, #141414); color: var(--text-secondary, #a1a1aa); text-decoration: none; padding: 13px 24px; border-radius: 10px; font-size: 15px; font-weight: 600; border: 1px solid var(--border, #1f1f1f); transition: border-color .15s; }
@@ -1174,12 +1177,14 @@ interface SubmissionResult {
     .share-title { font-size: 16px; font-weight: 700; color: var(--text-primary, #fff); margin: 0; }
 
     /* Visual share card */
-    .share-card { background: var(--bg-elevated, #141414); border: 1px solid var(--border, #1f1f1f); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-    .sc-logo { font-size: 12px; font-weight: 800; color: var(--text-muted, #52525b); letter-spacing: .5px; }
-    .sc-vs { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; }
-    .sc-user { color: var(--text-primary, #fff); }
-    .sc-sep { color: var(--text-muted, #52525b); font-size: 13px; }
-    .sc-opp { color: var(--text-muted, #52525b); }
+    .share-card { background: #0A0B0D; border: 1px solid var(--border-bright, #2a2a2a); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+    .sc-head { display: flex; align-items: center; gap: 6px; padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+    .sc-head .sc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-bright); }
+    .sc-logo { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted, #52525b); margin-left: 6px; }
+    .sc-vs { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 15px; font-weight: 700; }
+    .sc-user { color: var(--lime); }
+    .sc-sep { color: var(--text-muted, #52525b); font-size: 12px; }
+    .sc-opp { color: var(--magenta); }
     .sc-challenge { font-size: 12px; color: var(--text-muted, #52525b); line-height: 1.4; }
     .sc-result-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
     .sc-badge { font-family: var(--font-mono); font-size: 11px; font-weight: 900; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 6px; }
@@ -1590,56 +1595,55 @@ export class ArenaComponent implements OnInit, OnDestroy {
     const ctx = canvas.getContext('2d')!;
     ctx.scale(2, 2);
 
-    // Background
-    const bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0, '#0d0d0d'); bg.addColorStop(1, '#111');
-    ctx.fillStyle = bg;
+    // Background — near-black terminal tile
+    ctx.fillStyle = '#0A0B0D';
     this.roundRect(ctx, 0, 0, W, H, 14);
     ctx.fill();
-
-    // Border
-    ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
+    ctx.strokeStyle = '#2b313a'; ctx.lineWidth = 1;
     this.roundRect(ctx, 0.5, 0.5, W - 1, H - 1, 14);
     ctx.stroke();
 
-    // Logo
-    ctx.fillStyle = '#444'; ctx.font = '700 12px Inter, sans-serif';
-    ctx.fillText('⚡ MatchMood', 24, 40);
+    // Terminal chrome: three dots + mono title
+    ctx.fillStyle = '#2b313a';
+    for (const dx of [24, 38, 52]) { ctx.beginPath(); ctx.arc(dx, 30, 4, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#5a6169'; ctx.font = '500 12px "JetBrains Mono", monospace';
+    ctx.fillText('arena://result · matchmood', 70, 34);
+    ctx.strokeStyle = '#20242b'; ctx.beginPath(); ctx.moveTo(24, 50); ctx.lineTo(W - 24, 50); ctx.stroke();
 
-    // Username vs opponent
-    ctx.fillStyle = '#f0f0f0'; ctx.font = '700 18px Inter, sans-serif';
-    ctx.fillText(`@${user.username}`, 24, 80);
-    ctx.fillStyle = '#333'; ctx.font = '500 14px Inter, sans-serif';
-    ctx.fillText('vs  opponent', 24, 102);
+    // @you (lime) vs opponent (magenta)
+    ctx.fillStyle = '#C6FF3D'; ctx.font = '700 22px "Space Grotesk", sans-serif';
+    ctx.fillText(`@${user.username}`, 24, 90);
+    ctx.font = '600 14px "JetBrains Mono", monospace';
+    ctx.fillStyle = '#5a6169'; ctx.fillText('vs ', 24, 114);
+    ctx.fillStyle = '#FF3D77'; ctx.fillText('opponent', 24 + ctx.measureText('vs ').width, 114);
 
     // Challenge title
     const challenge = fd.rounds[0]?.challengeTitle ?? '';
     if (challenge) {
-      ctx.fillStyle = '#444'; ctx.font = 'italic 12px Inter, sans-serif';
-      ctx.fillText(`"${challenge}"`, 24, 130);
+      ctx.fillStyle = '#5a6169'; ctx.font = '500 12px "JetBrains Mono", monospace';
+      ctx.fillText(challenge.length > 48 ? challenge.slice(0, 45) + '…' : challenge, 24, 140);
     }
 
-    // Result badge
+    // Result badge + ELO
     const resultLabel = this.isWinner() ? 'WIN' : this.isDraw() ? 'DRAW' : 'LOSS';
-    const resultColor = this.isWinner() ? '#22c55e' : this.isDraw() ? '#888' : '#f43f5e';
-    const resultBg = this.isWinner() ? 'rgba(34,197,94,0.15)' : this.isDraw() ? 'rgba(136,136,136,0.12)' : 'rgba(244,63,94,0.12)';
+    const resultColor = this.isWinner() ? '#C6FF3D' : this.isDraw() ? '#8b939c' : '#FF3D77';
+    const resultBg = this.isWinner() ? 'rgba(198,255,61,0.14)' : this.isDraw() ? 'rgba(139,147,156,0.12)' : 'rgba(255,61,119,0.14)';
     ctx.fillStyle = resultBg;
-    this.roundRect(ctx, 24, 154, 62, 26, 6); ctx.fill();
-    ctx.fillStyle = resultColor; ctx.font = '900 11px Inter, sans-serif';
-    ctx.fillText(resultLabel, 38, 172);
+    this.roundRect(ctx, 24, 162, 66, 30, 999); ctx.fill();
+    ctx.fillStyle = resultColor; ctx.font = '700 12px "JetBrains Mono", monospace';
+    ctx.fillText(resultLabel, 40, 181);
 
-    // ELO change
     const eloSign = this.isWinner() ? '+' : this.isDraw() ? '±' : '−';
     const eloStr = `${eloSign}${fd.eloChange} ELO`;
-    ctx.fillStyle = resultColor; ctx.font = '800 16px Inter, sans-serif';
-    ctx.fillText(eloStr, 98, 172);
-
-    ctx.fillStyle = '#444'; ctx.font = '500 12px Inter, sans-serif';
-    ctx.fillText(`${user.rating} total`, 98 + ctx.measureText(eloStr).width + 12, 172);
+    ctx.fillStyle = resultColor; ctx.font = '700 20px "JetBrains Mono", monospace';
+    ctx.fillText(eloStr, 104, 183);
+    const eloW = ctx.measureText(eloStr).width;
+    ctx.fillStyle = '#5a6169'; ctx.font = '500 13px "JetBrains Mono", monospace';
+    ctx.fillText(`${user.rating} total`, 104 + eloW + 20, 183);
 
     // URL
-    ctx.fillStyle = '#2a2a2a'; ctx.font = '500 11px "JetBrains Mono", monospace';
-    ctx.fillText(`matchmood.app/u/${user.username}`, 24, H - 20);
+    ctx.fillStyle = '#3a4048'; ctx.font = '500 11px "JetBrains Mono", monospace';
+    ctx.fillText(`matchmood.dev/u/${user.username}`, 24, H - 22);
 
     try {
       canvas.toBlob(async (blob) => {

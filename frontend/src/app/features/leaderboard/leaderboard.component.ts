@@ -231,7 +231,7 @@ import { LeaderboardResponse } from '../../core/models/api.models';
       transition: border-color 150ms ease; font-family: inherit;
     }
     .search-input::placeholder { color: var(--text-muted); }
-    .search-input:focus { border-color: rgba(34,197,94,0.4); }
+    .search-input:focus { border-color: rgba(198,255,61,0.4); }
 
     .lang-filters { display: flex; gap: 6px; flex-wrap: wrap; }
     .lf {
@@ -242,7 +242,7 @@ import { LeaderboardResponse } from '../../core/models/api.models';
       cursor: pointer; transition: all 150ms ease; white-space: nowrap;
     }
     .lf:hover { border-color: rgba(255,255,255,0.15); color: var(--text-secondary); }
-    .lf.active { border-color: rgba(34,197,94,0.4); color: var(--green); background: rgba(34,197,94,0.06); }
+    .lf.active { border-color: rgba(198,255,61,0.4); color: var(--lime); background: rgba(198,255,61,0.06); }
     .lf-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
     /* ── Podium ── */
@@ -260,7 +260,7 @@ import { LeaderboardResponse } from '../../core/models/api.models';
     .pc-crown { font-size: 22px; margin-bottom: 4px; animation: crownBob 2.5s ease-in-out infinite; }
     @keyframes crownBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
-    .pc-rank-badge {
+    .pc-rank-badge { font-family: var(--font-mono);
       width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
       font-size: 11px; font-weight: 800; margin-bottom: 8px;
     }
@@ -279,7 +279,7 @@ import { LeaderboardResponse } from '../../core/models/api.models';
 
     .pc-name { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     .p1 .pc-name { font-size: 15px; }
-    .pc-elo { font-size: 20px; font-weight: 900; letter-spacing: -1px; color: var(--text-primary); }
+    .pc-elo { font-family: var(--font-mono); font-size: 20px; font-weight: 900; letter-spacing: -1px; color: var(--text-primary); }
     .p1 .pc-elo { font-size: 24px; color: #fbbf24; }
     .p2 .pc-elo { color: #94a3b8; }
     .p3 .pc-elo { color: #b45309; }
@@ -330,8 +330,8 @@ import { LeaderboardResponse } from '../../core/models/api.models';
     .t-row.top3 { background: rgba(180,83,9,0.03); }
     .t-row.top1:hover { background: rgba(251,191,36,0.09); }
 
-    .t-row.is-me { background: rgba(34,197,94,0.04); border-left: 2px solid var(--green); }
-    .t-row.my-pinned { background: rgba(34,197,94,0.06); }
+    .t-row.is-me { background: rgba(198,255,61,0.04); border-left: 2px solid var(--lime); }
+    .t-row.my-pinned { background: rgba(198,255,61,0.06); }
 
     @keyframes rowIn {
       from { opacity: 0; transform: translateY(8px); }
@@ -340,7 +340,7 @@ import { LeaderboardResponse } from '../../core/models/api.models';
 
     /* Rank */
     .c-rank { display: flex; align-items: center; justify-content: center; }
-    .rk         { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+    .rk         { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--text-muted); }
     .rk-gold    { color: #fbbf24; font-size: 15px; }
     .rk-silver  { color: #94a3b8; font-size: 14px; }
     .rk-bronze  { color: #b45309; font-size: 14px; }
@@ -349,22 +349,22 @@ import { LeaderboardResponse } from '../../core/models/api.models';
     .c-user { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .t-av   { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; object-fit: cover; }
     .t-name { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .you-tag { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.25); padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+    .you-tag { font-family: var(--font-mono); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; background: rgba(198,255,61,0.1); color: var(--lime); border: 1px solid rgba(198,255,61,0.25); padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
     .tier-dot { font-size: 10px; flex-shrink: 0; }
-    .tier-premium    { color: var(--green); }
-    .tier-enterprise { color: #a78bfa; }
+    .tier-premium    { color: var(--lime); }
+    .tier-enterprise { color: var(--magenta); }
 
     /* ELO */
-    .c-elo { font-size: 14px; font-weight: 700; color: var(--text-primary); text-align: right; }
+    .c-elo { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text-primary); text-align: right; }
 
     /* Win rate with bar */
     .c-wr { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
     .wr-bar-wrap { width: 44px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; flex-shrink: 0; overflow: hidden; }
     .wr-bar      { height: 100%; border-radius: 2px; background: var(--text-muted); transition: width 600ms ease; }
-    .wr-bar.wr-high { background: var(--green); }
+    .wr-bar.wr-high { background: var(--lime); }
     .wr-bar.wr-mid  { background: var(--amber); }
-    .wr-num { font-size: 13px; min-width: 36px; text-align: right; color: var(--text-muted); }
-    .wr-green { color: var(--green); }
+    .wr-num { font-family: var(--font-mono); font-size: 13px; min-width: 36px; text-align: right; color: var(--text-muted); }
+    .wr-green { color: var(--lime); }
     .wr-amber { color: var(--amber); }
 
     /* Other cols */

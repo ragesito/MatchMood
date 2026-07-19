@@ -40,7 +40,7 @@ import { ProfileData } from '../../core/models/api.models';
                   <span class="tier-badge tier-{{ p.tier.toLowerCase() }}">{{ tierLabel(p.tier) }}</span>
                 </div>
                 <div class="elo-row">
-                  <span class="elo-icon">⚡</span>
+                  
                   <span class="elo-val">{{ p.rating }}</span>
                   <span class="elo-label">ELO</span>
                 </div>
@@ -201,9 +201,9 @@ import { ProfileData } from '../../core/models/api.models';
       overflow: hidden;
       transition: border-color 250ms ease;
     }
-    .hero-card.tier-premium   { border-color: rgba(34,197,94,0.25); background: linear-gradient(135deg, var(--bg-surface) 60%, rgba(34,197,94,0.04)); }
-    .hero-card.tier-enterprise { border-color: rgba(139,92,246,0.2); background: linear-gradient(135deg, var(--bg-surface) 60%, rgba(139,92,246,0.03)); }
-    .hero-glow { position: absolute; top: -60px; left: -60px; width: 280px; height: 280px; background: radial-gradient(circle, rgba(34,197,94,0.05) 0%, transparent 70%); pointer-events: none; }
+    .hero-card.tier-premium   { border-color: rgba(198,255,61,0.25); background: linear-gradient(135deg, var(--bg-surface) 60%, rgba(198,255,61,0.04)); }
+    .hero-card.tier-enterprise { border-color: rgba(255,61,119,0.2); background: linear-gradient(135deg, var(--bg-surface) 60%, rgba(255,61,119,0.03)); }
+    .hero-glow { position: absolute; top: -60px; left: -60px; width: 280px; height: 280px; background: radial-gradient(circle, rgba(198,255,61,0.05) 0%, transparent 70%); pointer-events: none; }
     .hero-body { display: flex; align-items: center; gap: 24px; position: relative; z-index: 1; }
 
     .avatar-wrap { position: relative; flex-shrink: 0; width: 80px; height: 80px; }
@@ -213,7 +213,7 @@ import { ProfileData } from '../../core/models/api.models';
       position: absolute;
       inset: -3px;
       border-radius: 50%;
-      background: conic-gradient(var(--green), transparent, var(--green));
+      background: conic-gradient(var(--lime), transparent, var(--lime));
       animation: ringRotate 3s linear infinite;
       z-index: -1;
     }
@@ -224,11 +224,11 @@ import { ProfileData } from '../../core/models/api.models';
     h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
     .tier-badge { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
     .tier-badge.free       { background: var(--bg-elevated); color: var(--text-muted); }
-    .tier-badge.premium    { background: var(--green-glow); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
-    .tier-badge.enterprise { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+    .tier-badge.premium    { background: var(--lime-glow); color: var(--lime); border: 1px solid rgba(198,255,61,0.25); }
+    .tier-badge.enterprise { background: rgba(255,61,119,0.15); color: var(--magenta); border: 1px solid rgba(255,61,119,0.25); }
     .elo-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
-    .elo-icon { color: var(--green); font-size: 16px; }
-    .elo-val  { font-size: 20px; font-weight: 900; color: var(--green); letter-spacing: -1px; }
+    .elo-icon { color: var(--lime); font-size: 16px; }
+    .elo-val  { font-size: 20px; font-weight: 900; color: var(--lime); letter-spacing: -1px; }
     .elo-label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
     .joined { font-size: 13px; color: var(--text-muted); }
 
@@ -254,10 +254,10 @@ import { ProfileData } from '../../core/models/api.models';
       transition: border-color 150ms ease, transform 150ms ease;
     }
     .stat-box:hover { border-color: var(--border-bright); transform: translateY(-2px); }
-    .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
-    .stat-num   { font-size: 36px; font-weight: 900; letter-spacing: -2px; line-height: 1; }
-    .green { color: var(--green); }
-    .red   { color: var(--red); }
+    .stat-label { font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+    .stat-num   { font-family: var(--font-mono); font-size: 36px; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+    .green { color: var(--lime); }
+    .red   { color: var(--magenta); }
     .muted { color: var(--text-secondary); }
     .white { color: var(--text-primary); }
     .amber { color: var(--amber); }
@@ -266,15 +266,15 @@ import { ProfileData } from '../../core/models/api.models';
     .section { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
     .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
     .section-title  { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
-    .tier-tag { padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: var(--green-glow); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+    .tier-tag { padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: var(--lime-glow); color: var(--lime); border: 1px solid rgba(198,255,61,0.2); }
 
     /* ── Detailed stats ─────────────────────────────────────────────── */
     .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
     .detail-box  { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
-    .detail-num  { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin-bottom: 4px; }
-    .detail-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 10px; }
+    .detail-num  { font-family: var(--font-mono); font-size: 28px; font-weight: 900; letter-spacing: -1px; margin-bottom: 4px; }
+    .detail-label { font-family: var(--font-mono); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 10px; }
     .detail-bar-bg  { height: 6px; background: var(--bg-base); border-radius: 3px; overflow: hidden; }
-    .detail-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--green-dim)); border-radius: 3px; transition: width 800ms ease; }
+    .detail-bar-fill { height: 100%; background: linear-gradient(90deg, var(--lime), var(--lime-dim)); border-radius: 3px; transition: width 800ms ease; }
 
     /* ── Language bars ───────────────────────────────────────────────── */
     .lang-section { border-top: 1px solid var(--border); padding-top: 16px; }
@@ -283,8 +283,8 @@ import { ProfileData } from '../../core/models/api.models';
     .lang-row   { display: flex; align-items: center; gap: 10px; }
     .lang-name  { width: 90px; font-size: 13px; color: var(--text-secondary); flex-shrink: 0; }
     .lang-bar-bg { flex: 1; height: 6px; background: var(--bg-elevated); border-radius: 3px; overflow: hidden; }
-    .lang-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--green-dim)); border-radius: 3px; }
-    .lang-pct { font-size: 12px; color: var(--green); font-weight: 700; width: 36px; text-align: right; flex-shrink: 0; }
+    .lang-bar-fill { height: 100%; background: linear-gradient(90deg, var(--lime), var(--lime-dim)); border-radius: 3px; }
+    .lang-pct { font-size: 12px; color: var(--lime); font-weight: 700; width: 36px; text-align: right; flex-shrink: 0; }
     .lang-cnt { font-size: 11px; color: var(--text-muted); width: 60px; text-align: right; flex-shrink: 0; }
 
     /* ── Upgrade strip ───────────────────────────────────────────────── */
@@ -293,25 +293,25 @@ import { ProfileData } from '../../core/models/api.models';
       align-items: center;
       justify-content: space-between;
       padding: 12px 18px;
-      border: 1px solid rgba(34,197,94,0.15);
+      border: 1px solid rgba(198,255,61,0.15);
       border-radius: 8px;
-      background: rgba(34,197,94,0.02);
+      background: rgba(198,255,61,0.02);
     }
-    .upgrade-ent { border-color: rgba(139,92,246,0.15); background: rgba(139,92,246,0.02); }
+    .upgrade-ent { border-color: rgba(255,61,119,0.15); background: rgba(255,61,119,0.02); }
     .upgrade-text { font-size: 13px; color: var(--text-muted); }
     .upgrade-text strong { color: var(--text-secondary); }
-    .upgrade-link { font-size: 13px; color: var(--green); font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .upgrade-link { font-size: 13px; color: var(--lime); font-weight: 600; text-decoration: none; white-space: nowrap; }
     .upgrade-link:hover { text-decoration: underline; }
 
     /* ── Match history ───────────────────────────────────────────────── */
     .limit-tag  { font-size: 12px; color: var(--text-muted); margin-left: auto; }
-    .limit-link { color: var(--green); text-decoration: none; }
+    .limit-link { color: var(--lime); text-decoration: none; }
     .limit-link:hover { text-decoration: underline; }
 
     .empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 40px; }
     .empty-icon  { font-size: 32px; opacity: 0.2; }
     .empty-text  { font-size: 14px; color: var(--text-muted); }
-    .empty-cta   { font-size: 13px; color: var(--green); text-decoration: none; }
+    .empty-cta   { font-size: 13px; color: var(--lime); text-decoration: none; }
 
     .history-list { display: flex; flex-direction: column; gap: 4px; }
     .history-row {
@@ -325,15 +325,15 @@ import { ProfileData } from '../../core/models/api.models';
       transition: background 150ms ease, border-left-color 150ms ease;
     }
     .history-row:hover { background: var(--bg-hover); border-left-color: var(--border-bright); }
-    .history-row.row-win  { border-left-color: rgba(34,197,94,0.5); }
-    .history-row.row-win:hover  { border-left-color: var(--green); }
-    .history-row.row-loss { border-left-color: rgba(239,68,68,0.5); }
-    .history-row.row-loss:hover { border-left-color: var(--red); }
+    .history-row.row-win  { border-left-color: rgba(198,255,61,0.5); }
+    .history-row.row-win:hover  { border-left-color: var(--lime); }
+    .history-row.row-loss { border-left-color: rgba(255,61,119,0.5); }
+    .history-row.row-loss:hover { border-left-color: var(--magenta); }
     .history-row.row-draw { border-left-color: var(--border-bright); }
 
     .result-pill { width: 44px; text-align: center; font-size: 10px; font-weight: 800; padding: 4px 0; border-radius: 6px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.05em; }
-    .pill-win  { background: var(--green-glow); color: var(--green); }
-    .pill-loss { background: rgba(239,68,68,0.12); color: var(--red); }
+    .pill-win  { background: var(--lime-glow); color: var(--lime); }
+    .pill-loss { background: rgba(255,61,119,0.12); color: var(--magenta); }
     .pill-draw { background: var(--bg-elevated); color: var(--text-muted); }
 
     .match-info { flex: 1; min-width: 0; }
@@ -341,17 +341,17 @@ import { ProfileData } from '../../core/models/api.models';
     .match-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; flex-wrap: wrap; }
     .dot { color: var(--border-bright); }
     .lvl-tag { font-weight: 700; text-transform: uppercase; font-size: 10px; }
-    .lvl-easy   { color: var(--green); }
+    .lvl-easy   { color: var(--lime); }
     .lvl-medium { color: var(--amber); }
-    .lvl-hard   { color: var(--red); }
+    .lvl-hard   { color: var(--magenta); }
     .lang-pill { color: var(--text-muted); font-size: 11px; }
     .vs-text { color: var(--text-muted); }
     .vs-text strong { color: var(--text-secondary); }
 
     .match-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
     .elo-delta  { font-size: 14px; font-weight: 800; color: var(--text-muted); }
-    .elo-delta.pos { color: var(--green); }
-    .elo-delta.neg { color: var(--red); }
+    .elo-delta.pos { color: var(--lime); }
+    .elo-delta.neg { color: var(--magenta); }
     .match-date { font-size: 11px; color: var(--text-muted); }
 
     /* Responsive */
