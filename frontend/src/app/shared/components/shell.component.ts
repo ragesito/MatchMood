@@ -11,14 +11,14 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
   standalone: true,
   imports: [RouterLink, RouterLinkActive, RouterOutlet, RankModalComponent, FaqModalComponent, GameSetupModalComponent],
   template: `
-    @if (authService.user(); as user) {
-    <div class="shell">
+    <div class="shell" [class.no-sidebar]="!authService.user()">
 
       <!-- ─── Ambient background: terminal grid + lime glow ─────────── -->
       <div class="shell-grid"></div>
       <div class="shell-glow"></div>
 
-      <!-- ─── Sidebar ──────────────────────────────────────────────── -->
+      <!-- ─── Sidebar (logged-in only; public pages render standalone) ─ -->
+      @if (authService.user(); as user) {
       <aside class="sidebar" [class.collapsed]="collapsed()">
 
         <!-- Logo -->
@@ -190,19 +190,21 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
         </div>
 
       </aside>
+      }
 
       <!-- ─── Page content ─────────────────────────────────────────── -->
       <div class="page-content">
         <router-outlet />
       </div>
 
-      <!-- ─── Global modals ────────────────────────────────────────── -->
-      <app-rank-modal />
-      <app-faq-modal />
-      <app-game-setup-modal />
+      <!-- ─── Global modals (logged-in only) ───────────────────────── -->
+      @if (authService.user()) {
+        <app-rank-modal />
+        <app-faq-modal />
+        <app-game-setup-modal />
+      }
 
     </div>
-    }
   `,
   styles: [`
     .shell {
@@ -658,7 +660,7 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
         bottom: calc(100% + 12px); top: auto; left: auto; right: 6px; width: 210px;
       }
       .user-menu.collapsed .lang-submenu { left: auto; right: calc(100% + 6px); }
-      .page-content { padding-bottom: 58px; }
+      .shell:not(.no-sidebar) .page-content { padding-bottom: 58px; }
     }
   `],
 })
