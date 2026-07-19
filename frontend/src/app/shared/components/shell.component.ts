@@ -633,6 +633,33 @@ import { GameSetupModalComponent } from './game-setup-modal.component';
       flex-direction: column;
       overflow: hidden;
     }
+
+    /* ── Mobile: sidebar becomes a fixed bottom tab bar ─────────────── */
+    @media (max-width: 768px) {
+      .shell { flex-direction: column; }
+      .sidebar, .sidebar.collapsed {
+        position: fixed; bottom: 0; left: 0; right: 0; width: 100%;
+        height: 58px; flex-direction: row; align-items: center;
+        padding: 0 4px; border-right: none; border-top: 1px solid var(--border);
+        background: rgba(16,18,21,0.96); backdrop-filter: blur(12px); z-index: 200;
+      }
+      .sidebar-top { display: none; }
+      .sidebar-nav { flex-direction: row; justify-content: space-around; flex: 1; gap: 0; }
+      .nav-item, .sidebar.collapsed .nav-item { padding: 8px 12px; justify-content: center; }
+      .nav-label { display: none; }
+      .nav-accent { top: 0; bottom: auto; left: 50%; height: 2.5px; width: 22px;
+        transform: translateX(-50%) scaleX(0); border-radius: 0 0 2px 2px; }
+      .nav-item.active .nav-accent { transform: translateX(-50%) scaleX(1); opacity: 1; }
+      .user-area, .user-area.collapsed { margin: 0; }
+      .user-card { border: none; background: transparent; }
+      .user-card-inner, .sidebar.collapsed .user-card-inner { padding: 8px; }
+      .user-info, .user-chevron { display: none; }
+      .user-menu, .user-menu.collapsed {
+        bottom: calc(100% + 12px); top: auto; left: auto; right: 6px; width: 210px;
+      }
+      .user-menu.collapsed .lang-submenu { left: auto; right: calc(100% + 6px); }
+      .page-content { padding-bottom: 58px; }
+    }
   `],
 })
 export class ShellComponent {

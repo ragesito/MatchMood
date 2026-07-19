@@ -390,8 +390,13 @@ import { LeaderboardResponse } from '../../core/models/api.models';
     .pg-info { font-size: 13px; color: var(--text-muted); min-width: 50px; text-align: center; }
 
     @media (max-width: 640px) {
-      .podium { gap: 8px; }
-      .t-head, .t-row { grid-template-columns: 40px 1fr 64px 64px; }
+      .lb { overflow-x: hidden; }
+      .lb-inner { padding: 20px 14px 80px; }
+      .lb-hdr { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .lb-hdr-right { width: 100%; }
+      .podium { gap: 6px; }
+      .podium-card { min-width: 0; }
+      .t-head, .t-row { grid-template-columns: 34px 1fr 60px 60px; }
       .c-matches, .c-streak { display: none; }
       .lang-filters { display: none; }
     }

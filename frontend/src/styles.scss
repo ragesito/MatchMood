@@ -58,6 +58,12 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
 
+/* ── Mobile safety: never let a page scroll horizontally ───────────── */
+@media (max-width: 768px) {
+  html, body { overflow-x: hidden; }
+  .page, .sp, .sc, .db-root, .lb, .lb-inner, .arena, .postmatch-scroll { max-width: 100%; overflow-x: hidden; }
+}
+
 /* ── Router host elements — fill shell's page-content ──────────────── */
 app-arena        { display: flex; flex: 1; flex-direction: column; min-height: 0; overflow: hidden; }
 app-dashboard    { display: flex; flex: 1; flex-direction: column; min-height: 0; overflow-y: auto; }

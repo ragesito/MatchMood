@@ -716,6 +716,18 @@ type Tab = 'profile' | 'appearance' | 'notifications' | 'privacy' | 'gameplay' |
     .btn-del-confirm { background: var(--red); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 150ms ease; }
     .btn-del-confirm:hover:not(:disabled) { opacity: .85; }
     .btn-del-confirm:disabled { opacity: .4; cursor: not-allowed; }
+
+    @media (max-width: 700px) {
+      .sp { overflow-x: hidden; }
+      .sc { padding: 20px 16px 80px; overflow-x: hidden; }
+      .sp-hdr-inner, .sc-inner { padding-left: 0; padding-right: 0; }
+      .sc-inner { max-width: 100%; }
+      .tab-bar-inner { padding-left: 16px; padding-right: 16px; overflow-x: auto; }
+      .tab { flex-shrink: 0; }
+      .hero-stats { flex-wrap: wrap; gap: 10px; }
+      .toggle-row, .danger-row { flex-wrap: wrap; gap: 10px; }
+      .modal { padding: 22px; }
+    }
   `],
 })
 export class SettingsComponent implements OnInit {

@@ -162,6 +162,10 @@ const LANGUAGES: { id: SetupLanguage; label: string; color: string }[] = [
     }
     .gsm-confirm:hover  { filter: brightness(.9); }
     .gsm-confirm:active { transform: scale(0.98); }
+
+    @media (max-width: 480px) {
+      .gsm-grid { grid-template-columns: repeat(2, 1fr); }
+    }
   `],
 })
 export class GameSetupModalComponent {
