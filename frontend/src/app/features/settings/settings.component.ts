@@ -722,9 +722,10 @@ type Tab = 'profile' | 'appearance' | 'notifications' | 'privacy' | 'gameplay' |
       .sc { padding: 20px 16px 80px; overflow-x: hidden; }
       .sp-hdr-inner, .sc-inner { padding-left: 0; padding-right: 0; }
       .sc-inner { max-width: 100%; }
-      .tab-bar-inner { padding-left: 16px; padding-right: 16px; overflow-x: auto; }
-      .tab { flex-shrink: 0; }
-      .hero-stats { flex-wrap: wrap; gap: 10px; }
+      .tab-bar-inner { padding-left: 12px; padding-right: 12px; flex-wrap: wrap; row-gap: 4px; justify-content: center; }
+      .tab { flex-shrink: 0; padding: 8px 9px; font-size: 12px; }
+      .profile-hero { flex-wrap: wrap; padding: 18px 16px; }
+      .hero-stats { width: 100%; justify-content: space-around; gap: 10px; padding-top: 6px; border-top: 1px solid var(--border); }
       .toggle-row, .danger-row { flex-wrap: wrap; gap: 10px; }
       .modal { padding: 22px; }
     }
