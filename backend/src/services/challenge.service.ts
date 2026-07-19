@@ -55,8 +55,8 @@ const LANG_GUIDE: Record<string, { starterExample: string; runnerExample: string
   },
   typescript: {
     starterExample: `function solve(nums: number[]): number {\n  // Write your solution here\n  return -1;\n}`,
-    runnerExample:  `import * as fs from 'fs';\n\n// SOLVE_HERE\n\nconst _lines = fs.readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst _arg1 = JSON.parse(_lines[0]);\nconst _result = solve(_arg1);\nprocess.stdout.write(JSON.stringify(_result));`,
-    notes: 'starterCode = ONLY the solve() function. runnerCode = full TS file with "import * as fs" at top, "// SOLVE_HERE" marker, then the runner. The marker is replaced at submission time. Use _prefixed variable names in runner to avoid conflicts.',
+    runnerExample:  `declare var require: any;\ndeclare var process: any;\n\n// SOLVE_HERE\n\nconst _lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst _arg1 = JSON.parse(_lines[0]);\nconst _result = solve(_arg1);\nprocess.stdout.write(JSON.stringify(_result));`,
+    notes: 'starterCode = ONLY the solve() function (WITH TypeScript type annotations). runnerCode = the two "declare var" lines, then the "// SOLVE_HERE" marker, then the runner. CRITICAL: the Judge0 TypeScript compiler has NO @types/node, so you MUST NOT use "import ... from" statements and MUST NOT reference process/require without the "declare var" lines shown. Use require(\'fs\') (never import) to read stdin. Use _prefixed variable names in the runner.',
   },
   python: {
     starterExample: `def solve(nums):\n    # Write your solution here\n    return None`,
@@ -70,13 +70,13 @@ const LANG_GUIDE: Record<string, { starterExample: string; runnerExample: string
   },
   rust: {
     starterExample: `fn solve(nums: Vec<i64>) -> i64 {\n    // Write your solution here\n    -1\n}`,
-    runnerExample:  `use std::io::{self, Read};\n\n// SOLVE_HERE\n\nfn main() {\n    let mut input = String::new();\n    io::stdin().read_to_string(&mut input).unwrap();\n    let lines: Vec<&str> = input.trim().split('\\n').collect();\n    let arg1: Vec<i64> = serde_json::from_str(lines[0]).unwrap_or_default();\n    let result = solve(arg1);\n    print!("{}", serde_json::to_string(&result).unwrap());\n}`,
-    notes: 'starterCode = ONLY the fn solve() function (no use statements, no main). runnerCode = full Rust file template with "// SOLVE_HERE" marker. The marker is replaced at submission time. Use serde_json for JSON parsing.',
+    runnerExample:  `use std::io::{self, Read};\n\n// SOLVE_HERE\n\nfn main() {\n    let mut input = String::new();\n    io::stdin().read_to_string(&mut input).unwrap();\n    let line = input.trim();\n    let inner = line.trim_start_matches('[').trim_end_matches(']');\n    let arg1: Vec<i64> = if inner.trim().is_empty() { vec![] } else {\n        inner.split(',').map(|s| s.trim().parse().unwrap()).collect()\n    };\n    let result = solve(arg1);\n    print!("{}", result);\n}`,
+    notes: 'starterCode = ONLY the fn solve() function (no use statements, no main). runnerCode = full Rust file template with "// SOLVE_HERE" marker, replaced at submission time. CRITICAL: Judge0 Rust has the STANDARD LIBRARY ONLY — NO external crates (do NOT use serde, serde_json, itertools, etc.; they will not compile). Parse the JSON input manually with std string methods (see the example). Print a scalar result with print!("{}", result). If solve returns a Vec, format it manually as e.g. [1,2,3] with no spaces.',
   },
   java: {
     starterExample: `public static int solve(int[] nums) {\n    // Write your solution here\n    return -1;\n}`,
-    runnerExample:  `import java.util.*;\nimport java.io.*;\n\nclass Solution {\n    // SOLVE_HERE\n}\n\nclass Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String line = br.readLine();\n        int[] arg1 = Arrays.stream(line.replaceAll("[\\\\[\\\\]]","").split(",")).mapToInt(Integer::parseInt).toArray();\n        System.out.print(Solution.solve(arg1));\n    }\n}`,
-    notes: 'starterCode = ONLY the static method body (no class, no imports). runnerCode = full Java file with Solution class containing "// SOLVE_HERE" marker and a Main class with main(). The marker is replaced at submission time. Parse stdin manually without JSON libraries.',
+    runnerExample:  `import java.util.*;\nimport java.io.*;\n\nclass Solution {\n    // SOLVE_HERE\n}\n\nclass Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String line = br.readLine().trim();\n        if (line.startsWith("[")) line = line.substring(1, line.length() - 1);\n        int[] arg1 = line.isEmpty() ? new int[0]\n            : Arrays.stream(line.split(",")).map(String::trim).mapToInt(Integer::parseInt).toArray();\n        System.out.print(Solution.solve(arg1));\n    }\n}`,
+    notes: 'starterCode = ONLY the static method (no class, no imports). runnerCode = full Java file with a Solution class containing the "// SOLVE_HERE" marker and a Main class with main(). Parse stdin manually. CRITICAL: do NOT use backslash escapes like \\[ or \\] inside Java string literals (they are illegal Java escapes and will not compile) — strip the [ ] brackets with substring as shown, never with a regex containing backslashes.',
   },
   cpp: {
     starterExample: `#include <bits/stdc++.h>\nusing namespace std;\n\nint solve(int n) {\n    // Write your solution here\n    return -1;\n}`,
@@ -173,14 +173,32 @@ async function generateWithAI(level: Level, language: string): Promise<ReturnTyp
   //     hand-written output — it's wrong often enough that demanding a match
   //     just rejects good challenges and falls back to the wrong language.
   const languageId = JUDGE0_LANG[language] ?? 63;
-  const fullCode = assembleFullCode(generated.solution, generated.runnerCode);
-  const runs = await Promise.all(
-    generated.testCases.map((tc) => runViaJudge0(fullCode, languageId, tc.input)),
-  );
-  if (runs.some((r) => !r.ok)) {
+  const solutionCode = assembleFullCode(generated.solution, generated.runnerCode);
+  const starterCode  = assembleFullCode(generated.starterCode, generated.runnerCode);
+
+  // Run the reference solution AND the empty starter through Judge0 in parallel.
+  const [refRuns, starterRuns] = await Promise.all([
+    Promise.all(generated.testCases.map((tc) => runViaJudge0(solutionCode, languageId, tc.input))),
+    Promise.all(generated.testCases.map((tc) => runViaJudge0(starterCode,  languageId, tc.input))),
+  ]);
+
+  // The reference solution must run cleanly on every case — otherwise we can't
+  // compute a trustworthy expected output, so reject and regenerate.
+  if (refRuns.some((r) => !r.ok)) {
     throw new Error('Reference solution failed to run cleanly on a test case');
   }
-  const testCases = generated.testCases.map((tc, i) => ({ input: tc.input, expectedOutput: runs[i].output }));
+  const testCases = generated.testCases.map((tc, i) => ({ input: tc.input, expectedOutput: refRuns[i].output }));
+
+  // Discrimination guard: a do-nothing submission (the empty starter) must NOT
+  // win. If it passes every test, the challenge doesn't distinguish a correct
+  // answer from an empty one — which happens when the AI's reference solution is
+  // buggy (e.g. always returns 0, so the outputs are all "0" and the starter's
+  // default matches them). Serving it would reproduce the perpetual-draw bug, so
+  // reject and regenerate.
+  const starterPassed = starterRuns.filter((r, i) => r.ok && r.output === testCases[i].expectedOutput).length;
+  if (starterPassed === testCases.length) {
+    throw new Error('Empty starter passes all tests — challenge does not discriminate a correct answer; regenerating');
+  }
 
   const challenge = await prisma.challenge.create({
     data: {
