@@ -16,16 +16,38 @@ passport.use(
       try {
         const githubId = profile.id;
         const githubUsername = profile.username ?? null;
-        const username = githubUsername ?? `user_${githubId}`;
         const avatarUrl = profile.photos?.[0]?.value ?? null;
         const email = profile.emails?.[0]?.value ?? null;
 
-        // Upsert: create user if not exists, update avatar/email/githubUsername on login
-        const user = await prisma.user.upsert({
-          where: { githubId },
-          update: { avatarUrl, email, githubUsername },
-          create: { githubId, githubUsername, username, avatarUrl, email },
-        });
+        // Resolve the account WITHOUT ever hitting a unique-constraint crash
+        // ("Resource already exists"). username and email are both @unique, so a
+        // plain upsert-by-githubId throws P2002 whenever a row with the same
+        // username/email already exists under a different (or missing) githubId.
+        //   1) Canonical identity: the GitHub id.
+        //   2) Fallback: an account created earlier with the same email but not
+        //      yet linked to this GitHub id — link it instead of duplicating.
+        let user = await prisma.user.findUnique({ where: { githubId } });
+        if (!user && email) {
+          user = await prisma.user.findUnique({ where: { email } });
+        }
+
+        if (user) {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { githubId, avatarUrl, githubUsername, ...(email ? { email } : {}) },
+          });
+        } else {
+          // Brand-new user. The GitHub handle may already be taken as a
+          // username, so guarantee a unique one before creating.
+          const base = githubUsername ?? `user_${githubId}`;
+          let username = base;
+          while (await prisma.user.findUnique({ where: { username } })) {
+            username = `${base}_${Math.floor(Math.random() * 100000)}`;
+          }
+          user = await prisma.user.create({
+            data: { githubId, githubUsername, username, avatarUrl, email },
+          });
+        }
 
         return done(null, { userId: user.id, username: user.username });
       } catch (error) {
